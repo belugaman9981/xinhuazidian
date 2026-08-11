@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>检字表 · Radical Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page: #EFE4CC;
+    --page-shadow: #DCCEA8;
+    --ink: #241F18;
+    --ink-soft: #55483A;
+    --seal: #A5312A;
+    --seal-dark: #7C2420;
+    --gold: #A9843F;
+    --cover: #6E1E1E;
+    --cover-dark: #501414;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(ellipse at center, #2b2420 0%, #16120f 100%);
+    font-family: "Noto Serif", serif;
+    color: var(--ink);
+    overflow-x:hidden;
+  }
+  .stage{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding: 32px 16px;
+  }
+  .book{
+    position:relative;
+    width:min(1080px, 96vw);
+    background: linear-gradient(180deg, var(--cover) 0%, var(--cover-dark) 100%);
+    border-radius: 6px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.04) inset;
+    padding: 22px;
+  }
+  .book::before{
+    content:"";
+    position:absolute; inset:10px;
+    border: 1px solid rgba(201,168,90,0.35);
+    border-radius: 4px;
+    pointer-events:none;
+  }
+  .spread{
+    position:relative;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--page);
+    border-radius: 2px;
+    min-height: 640px;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.12);
+  }
+  .spread::after{
+    content:"";
+    position:absolute; left:50%; top:0; bottom:0; width:26px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.14) 45%, rgba(0,0,0,0.14) 55%, transparent);
+    pointer-events:none;
+  }
+  .page{ padding: 34px 30px; position:relative; }
+  .page.left{ border-right: none; }
+  .page-title{
+    font-family:"Noto Serif SC", serif;
+    font-weight:700;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--seal-dark);
+    margin: 0 0 4px 0;
+  }
+  .page-sub{
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+  }
+  .radical-list{
+    display:flex; flex-direction:column; gap: 2px;
+  }
+  .stroke-group{ margin-bottom: 10px; }
+  .stroke-group-label{
+    font-size: 11px; color: var(--ink-soft);
+    letter-spacing: 2px; margin: 10px 0 6px 2px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .stroke-group-label::after{
+    content:""; flex:1; height:1px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0 3px, transparent 3px 7px);
+    opacity:0.6;
+  }
+  .radical-row{
+    display:flex; align-items:baseline; gap: 10px;
+    padding: 5px 6px; border-radius: 3px;
+    cursor:pointer; transition: background .15s ease;
+  }
+  .radical-row:hover{ background: rgba(165,49,42,0.08); }
+  .radical-row.active{ background: rgba(165,49,42,0.16); }
+  .radical-glyph{
+    font-family:"Noto Serif SC", serif;
+    font-size: 22px; width: 34px; text-align:center;
+    color: var(--ink);
+  }
+  .radical-no{
+    font-size: 10px; color: var(--gold); width: 20px;
+  }
+  .radical-meaning{
+    font-size: 12px; color: var(--ink-soft); font-style: italic;
+  }
+
+  /* Right page: entries for selected radical */
+  .entries-head{
+    display:flex; align-items:center; gap: 14px; margin-bottom: 6px;
+  }
+  .entries-head .big-glyph{
+    font-family:"Noto Serif SC", serif; font-size: 44px; color: var(--seal);
+    line-height:1;
+  }
+  .entries-head .meta{ font-size:12px; color: var(--ink-soft); }
+  .entries-empty{
+    margin-top: 60px; text-align:center; color: var(--ink-soft);
+    font-style: italic; font-size: 13px;
+  }
+  .stroke-block{ margin-top: 16px; }
+  .stroke-block-label{
+    font-size: 11px; color: var(--seal-dark); letter-spacing:2px;
+    margin-bottom: 6px;
+  }
+  .char-grid{
+    display:flex; flex-wrap:wrap; gap: 8px;
+  }
+  .char-tile{
+    width: 46px; height: 46px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Noto Serif SC", serif; font-size: 22px;
+    background: #fff8e8;
+    border: 1px solid rgba(165,49,42,0.25);
+    border-radius: 3px;
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .char-tile:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    border-color: var(--seal);
+  }
+
+  /* thumb index tabs */
+  .thumb-index{
+    position:absolute; right:-19px; top: 24px; bottom: 24px;
+    display:flex; flex-direction:column; justify-content:flex-start; gap: 6px;
+    z-index: 3;
+  }
+  .thumb{
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    background: var(--seal);
+    color: #fff8e8;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 4px;
+    border-radius: 0 4px 4px 0;
+    cursor:pointer;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.3);
+    opacity: 0.88;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .thumb:hover, .thumb.active{ opacity:1; transform: translateX(3px); }
+
+  /* detail overlay — like a slipped-in page */
+  .detail-overlay{
+    position:fixed; inset:0; background: rgba(15,10,8,0.55);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition: opacity .18s ease;
+    z-index: 10;
+  }
+  .detail-overlay.show{ opacity:1; pointer-events:auto; }
+  .detail-card{
+    width: min(360px, 88vw);
+    background: #fff8e8;
+    border-radius: 6px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    padding: 26px 24px;
+    position:relative;
+    transform: translateY(10px) scale(0.98);
+    transition: transform .18s ease;
+    border: 1px solid rgba(165,49,42,0.25);
+  }
+  .detail-overlay.show .detail-card{ transform: translateY(0) scale(1); }
+  .detail-close{
+    position:absolute; top:10px; right:14px;
+    font-size: 18px; color: var(--ink-soft); cursor:pointer; background:none; border:none;
+  }
+  .detail-glyph{
+    font-family:"Noto Serif SC", serif; font-size: 64px; color: var(--seal);
+    text-align:center; line-height:1;
+  }
+  .detail-pinyin{ text-align:center; font-size: 18px; color: var(--ink-soft); margin: 6px 0 2px; }
+  .detail-def{ text-align:center; font-size: 14px; margin-top: 10px; color: var(--ink); }
+  .detail-radical-line{
+    text-align:center; font-size: 11px; color: var(--gold); margin-top: 14px;
+    letter-spacing: 1px;
+  }
+  .detail-total{
+    text-align:center; font-size: 11px; color: var(--ink-soft); margin-top: 4px;
+  }
+
+  .footer-note{
+    text-align:center; color: rgba(239,228,204,0.55); font-size: 11px;
+    margin-top: 14px; letter-spacing: 1px;
+  }
+  .data-source-badge{
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    background: rgba(0,0,0,0.55); color: #f2e8d5; font-size: 11px;
+    padding: 6px 12px; border-radius: 20px; letter-spacing: 0.5px;
+    pointer-events: none; z-index: 5;
+  }
+
+  @media (max-width: 720px){
+    .spread{ grid-template-columns: 1fr; }
+    .spread::after{ display:none; }
+    .page.left{ border-bottom: 1px dashed rgba(165,49,42,0.3); }
+    .thumb-index{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="book">
+    <div class="spread">
+      <div class="page left">
+        <div class="page-title">部首檢字表</div>
+        <div class="page-sub">Radical Index · click a radical</div>
+        <div id="radicalList" class="radical-list"></div>
+      </div>
+      <div class="page right">
+        <div id="entriesPane">
+          <div class="entries-empty">选一个部首 — choose a radical to see its characters</div>
+        </div>
+      </div>
+      <div id="thumbIndex" class="thumb-index"></div>
+    </div>
+  </div>
+</div>
+
+<div id="detailOverlay" class="detail-overlay">
+  <div class="detail-card">
+    <button class="detail-close" id="detailClose">&times;</button>
+    <div class="detail-glyph" id="detailGlyph"></div>
+    <div class="detail-pinyin" id="detailPinyin"></div>
+    <div class="detail-def" id="detailDef"></div>
+    <div class="detail-radical-line" id="detailRadicalLine"></div>
+    <div class="detail-total" id="detailTotal"></div>
+  </div>
+</div>
+<div id="dataSourceBadge" class="data-source-badge"></div>
+
+<script src="radicals_full.js"></script>
+<script src="sample_data.js"></script>
+<script src="data_loader.js"></script>
+<script>
+  const radicalListEl = document.getElementById('radicalList');
+  const entriesPaneEl = document.getElementById('entriesPane');
+  const thumbIndexEl = document.getElementById('thumbIndex');
+  const overlay = document.getElementById('detailOverlay');
+
+  const RADICALS = KANGXI_RADICALS_FULL; // all 214, from radicals_full.js
+  let ENTRIES = []; // populated once data loads (full dataset or sample fallback)
+
+  // group radicals by their own stroke count for the thumb tabs + left page sections
+  const byStroke = {};
+  RADICALS.forEach(r => {
+    (byStroke[r.strokes] = byStroke[r.strokes] || []).push(r);
+  });
+  const strokeKeys = Object.keys(byStroke).map(Number).sort((a,b)=>a-b);
+
+  function renderLeftPage(){
+    radicalListEl.innerHTML = '';
+    strokeKeys.forEach(sk => {
+      const group = document.createElement('div');
+      group.className = 'stroke-group';
+      group.id = 'stroke-sec-' + sk;
+      const label = document.createElement('div');
+      label.className = 'stroke-group-label';
+      label.textContent = sk + ' 画';
+      group.appendChild(label);
+      byStroke[sk].forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'radical-row';
+        row.dataset.radical = r.no;
+        row.innerHTML = `
+          <span class="radical-no">${r.no}</span>
+          <span class="radical-glyph">${r.char}${r.variant ? ' / '+r.variant : ''}</span>
+          <span class="radical-meaning">${r.meaning}</span>`;
+        row.addEventListener('click', () => selectRadical(r.no));
+        group.appendChild(row);
+      });
+      radicalListEl.appendChild(group);
+    });
+  }
+
+  function renderThumbIndex(){
+    thumbIndexEl.innerHTML = '';
+    strokeKeys.forEach(sk => {
+      const tab = document.createElement('div');
+      tab.className = 'thumb';
+      tab.textContent = sk + '画';
+      tab.addEventListener('click', () => {
+        document.getElementById('stroke-sec-' + sk).scrollIntoView({behavior:'smooth', block:'start'});
+      });
+      thumbIndexEl.appendChild(tab);
+    });
+  }
+
+  function selectRadical(no){
+    document.querySelectorAll('.radical-row').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.radical) === no);
+    });
+    const radical = RADICALS.find(r => r.no === no);
+    const entries = ENTRIES.filter(e => e.r === no).sort((a,b) => a.rs - b.rs);
+
+    const byRs = {};
+    entries.forEach(e => (byRs[e.rs] = byRs[e.rs] || []).push(e));
+    const rsKeys = Object.keys(byRs).map(Number).sort((a,b)=>a-b);
+
+    let html = `
+      <div class="entries-head">
+        <div class="big-glyph">${radical.char}${radical.variant ? ' '+radical.variant : ''}</div>
+        <div class="meta">部首 ${radical.no} · ${radical.strokes} 画<br>${radical.meaning}</div>
+      </div>`;
+
+    if (rsKeys.length === 0){
+      html += `<div class="entries-empty">（此部首暂无收字 — no sample characters filed under this radical yet）</div>`;
+    }
+
+    rsKeys.forEach(rs => {
+      html += `<div class="stroke-block">
+        <div class="stroke-block-label">+${rs} 画（部首外笔画）</div>
+        <div class="char-grid">`;
+      byRs[rs].forEach(e => {
+        html += `<div class="char-tile" data-word="${e.w}">${e.w}</div>`;
+      });
+      html += `</div></div>`;
+    });
+
+    entriesPaneEl.innerHTML = html;
+    entriesPaneEl.querySelectorAll('.char-tile').forEach(tile => {
+      tile.addEventListener('click', () => showDetail(tile.dataset.word, radical));
+    });
+  }
+
+  function showDetail(word, radical){
+    const entry = ENTRIES.find(e => e.w === word);
+    document.getElementById('detailGlyph').textContent = entry.w;
+    document.getElementById('detailPinyin').textContent = entry.py;
+    document.getElementById('detailDef').textContent = entry.def;
+    document.getElementById('detailRadicalLine').textContent =
+      `部首 ${radical.char} (${radical.no}) · +${entry.rs} 画`;
+    document.getElementById('detailTotal').textContent =
+      entry.ts ? `Total strokes: ${entry.ts}` : '';
+    overlay.classList.add('show');
+  }
+  document.getElementById('detailClose').addEventListener('click', () => overlay.classList.remove('show'));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+
+  async function init(){
+    renderLeftPage();
+    renderThumbIndex();
+
+    const { entries, source } = await loadJianziEntries();
+    ENTRIES = entries;
+
+    const badge = document.getElementById('dataSourceBadge');
+    if (source === 'full') {
+      badge.textContent = `Full dataset loaded — ${ENTRIES.length.toLocaleString()} characters`;
+    } else {
+      badge.textContent =
+        'Sample data only (~50 characters) — run build_unihan_data.py + serve.py for the full dictionary';
+    }
+  }
+  init();
+</script>
+
+</body>
+</html>
