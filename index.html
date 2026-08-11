@@ -141,6 +141,56 @@
     margin-top: 60px; text-align:center; color: var(--ink-soft);
     font-style: italic; font-size: 13px;
   }
+  .index-head{ margin-bottom: 22px; }
+  .index-title{
+    font-family:"Noto Serif SC", serif; font-weight:700;
+    font-size: 20px; letter-spacing: 3px; color: var(--seal-dark);
+  }
+  .index-sub{
+    font-size: 11px; color: var(--ink-soft); letter-spacing: 1px; margin-top: 5px;
+    text-transform: uppercase;
+  }
+  .stroke-nav-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .stroke-nav-tile{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: 13px 6px;
+    border: 1px solid rgba(165,49,42,0.22);
+    border-radius: 4px;
+    background: #fff8e8;
+    cursor:pointer;
+    transition: background .15s ease, border-color .15s ease, transform .12s ease;
+  }
+  .stroke-nav-tile:hover{
+    background: rgba(165,49,42,0.09);
+    border-color: var(--seal);
+    transform: translateY(-1px);
+  }
+  .snav-label{
+    font-family:"Noto Serif SC", serif;
+    font-size: 15px; color: var(--ink);
+  }
+  .snav-count{
+    font-size: 10px; color: var(--gold); margin-top: 4px;
+  }
+  .index-stats{
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(165,49,42,0.18);
+    display: flex; gap: 24px; justify-content: center;
+  }
+  .stat-item{ text-align: center; }
+  .stat-num{
+    font-family:"Noto Serif SC", serif; font-size: 22px; color: var(--seal-dark); display:block;
+  }
+  .stat-label{ font-size: 10px; color: var(--ink-soft); letter-spacing: 1px; text-transform: uppercase; }
+  .index-hint{
+    text-align:center; font-size: 11px; color: var(--ink-soft);
+    font-style:italic; margin-top: 20px;
+  }
   .stroke-block{ margin-top: 16px; }
   .stroke-block-label{
     font-size: 11px; color: var(--seal-dark); letter-spacing:2px;
@@ -238,9 +288,7 @@
         <div id="radicalList" class="radical-list"></div>
       </div>
       <div class="page right">
-        <div id="entriesPane">
-          <div class="entries-empty">选一个部首 — choose a radical to see its characters</div>
-        </div>
+        <div id="entriesPane"></div>
       </div>
       <div id="thumbIndex" class="thumb-index"></div>
     </div>
@@ -367,19 +415,53 @@
   document.getElementById('detailClose').addEventListener('click', () => overlay.classList.remove('show'));
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
 
+  function renderDefaultRight(){
+    let html = `
+      <div class="index-head">
+        <div class="index-title">笔画索引</div>
+        <div class="index-sub">Stroke-count index · click to jump</div>
+      </div>
+      <div class="stroke-nav-grid">`;
+    strokeKeys.forEach(sk => {
+      const count = byStroke[sk].length;
+      html += `<div class="stroke-nav-tile" data-sk="${sk}">
+        <span class="snav-label">${sk} 画</span>
+        <span class="snav-count">${count} 部首</span>
+      </div>`;
+    });
+    html += `</div>
+      <div class="index-stats">
+        <div class="stat-item"><span class="stat-num">${RADICALS.length}</span><span class="stat-label">部首</span></div>
+        <div class="stat-item"><span class="stat-num" id="statChars">—</span><span class="stat-label">汉字</span></div>
+        <div class="stat-item"><span class="stat-num">${strokeKeys.length}</span><span class="stat-label">笔画组</span></div>
+      </div>
+      <div class="index-hint">← 左侧选择部首 · select a radical on the left</div>`;
+    entriesPaneEl.innerHTML = html;
+    entriesPaneEl.querySelectorAll('.stroke-nav-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        document.getElementById('stroke-sec-' + tile.dataset.sk)
+          .scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+  }
+
   async function init(){
     renderLeftPage();
     renderThumbIndex();
+    renderDefaultRight();
 
     const { entries, source } = await loadJianziEntries();
     ENTRIES = entries;
 
+    const charStat = document.getElementById('statChars');
+    if (charStat) charStat.textContent = ENTRIES.length.toLocaleString();
+
     const badge = document.getElementById('dataSourceBadge');
     if (source === 'full') {
-      badge.textContent = `Full dataset loaded — ${ENTRIES.length.toLocaleString()} characters`;
+      badge.textContent = `Full dataset — ${ENTRIES.length.toLocaleString()} characters`;
     } else {
       badge.textContent =
-        'Sample data only (~50 characters) — run build_unihan_data.py + serve.py for the full dictionary';
+        'Sample data (~50 chars) — run build_unihan_data.py + serve.py for full dictionary';
     }
   }
   init();
