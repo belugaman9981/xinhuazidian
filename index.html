@@ -48,8 +48,7 @@
   }
   .spread{
     position:relative;
-    display:grid;
-    grid-template-columns: 1fr 1fr;
+    display:block;
     background: var(--page);
     border-radius: 2px;
     height: calc(100vh - 100px);
@@ -65,7 +64,7 @@
     background: linear-gradient(180deg, transparent, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.13) 50%, rgba(0,0,0,0.1) 80%, transparent);
     pointer-events:none; z-index:1;
   }
-  .page{ padding: 22px 26px; position:relative; overflow-y: auto; height: 100%; box-sizing:border-box; }
+  .page{ padding: 22px 28px; position:relative; display:flex; flex-direction:column; height:100%; box-sizing:border-box; }
   .page-title{
     font-family:"Noto Serif SC", serif;
     font-weight:700;
@@ -82,9 +81,12 @@
     text-transform: uppercase;
   }
   .radical-list{
-    columns: 2;
-    column-gap: 16px;
+    columns: 4;
+    column-gap: 18px;
     column-fill: balance;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
   }
   .stroke-group{ margin-bottom: 10px; }
   .stroke-group-label{
@@ -158,6 +160,28 @@
 
   .thumb-index{ display: none; }
 
+  /* entries popup overlay */
+  .radical-overlay{
+    position:fixed; inset:0; background: rgba(15,10,8,0.55);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition: opacity .18s ease;
+    z-index: 8;
+  }
+  .radical-overlay.show{ opacity:1; pointer-events:auto; }
+  .radical-card{
+    width: min(560px, 90vw); max-height: 80vh;
+    background: #fff8e8; border-radius: 6px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    padding: 26px 24px; position:relative; overflow-y: auto;
+    border: 1px solid rgba(165,49,42,0.25);
+    transform: translateY(10px) scale(0.98); transition: transform .18s ease;
+  }
+  .radical-overlay.show .radical-card{ transform: translateY(0) scale(1); }
+  .radical-close{
+    position:absolute; top:10px; right:14px;
+    font-size: 18px; color: var(--ink-soft); cursor:pointer; background:none; border:none;
+  }
+
   /* page flip navigation */
   .page-nav{
     display:flex; align-items:center; justify-content:center; gap: 22px;
@@ -226,11 +250,9 @@
   }
 
   @media (max-width: 720px){
-    .spread{ grid-template-columns: 1fr; height: auto; overflow: visible; }
-    .spread::after{ display:none; }
-    .page{ height: auto; overflow-y: visible; padding: 20px 16px; }
-    .page-title{ font-size: 18px; }
-    .radical-list{ columns: 1; }
+    .spread{ height: auto; min-height: 100vh; overflow: visible; }
+    .page{ height: auto; }
+    .radical-list{ columns: 2; flex: none; overflow: visible; }
   }
 </style>
 </head>
@@ -239,13 +261,10 @@
 <div class="stage">
   <div class="book">
     <div class="spread">
-      <div class="page left">
+      <div class="page">
         <div class="page-title">部首檢字表</div>
         <div class="page-sub">(一) 部首目錄 · click a radical</div>
         <div id="radicalList" class="radical-list"></div>
-      </div>
-      <div class="page right">
-        <div id="entriesPane"></div>
       </div>
     </div>
     <div class="page-nav">
@@ -268,13 +287,21 @@
 </div>
 <div id="dataSourceBadge" class="data-source-badge"></div>
 
+<div id="radicalOverlay" class="radical-overlay">
+  <div class="radical-card">
+    <button class="radical-close" id="radicalClose">&times;</button>
+    <div id="radicalPane"></div>
+  </div>
+</div>
+
 <script src="radicals_full.js"></script>
 <script src="sample_data.js"></script>
 <script src="data_loader.js"></script>
 <script>
-  const radicalListEl = document.getElementById('radicalList');
-  const entriesPaneEl = document.getElementById('entriesPane');
-  const detailOverlay = document.getElementById('detailOverlay');
+  const radicalListEl  = document.getElementById('radicalList');
+  const radicalOverlay = document.getElementById('radicalOverlay');
+  const radicalPane    = document.getElementById('radicalPane');
+  const detailOverlay  = document.getElementById('detailOverlay');
 
   const RADICALS = KANGXI_RADICALS_FULL;
   let ENTRIES = [];
@@ -298,12 +325,11 @@
   const CN = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七'];
   const strokeLabel = sk => (CN[sk-1] || sk) + '画';
 
-  function renderLeftPage(p){
+  function renderPage(p){
     radicalListEl.innerHTML = '';
     strokesForPage(p).forEach(sk => {
       const group = document.createElement('div');
       group.className = 'stroke-group';
-      group.id = 'stroke-sec-' + sk;
       const label = document.createElement('div');
       label.className = 'stroke-group-label';
       label.textContent = strokeLabel(sk);
@@ -333,14 +359,9 @@
 
   function goToPage(p){
     currentPage = p;
-    renderLeftPage(p);
+    renderPage(p);
     renderPageNav();
-    renderDefaultRight();
     document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
-  }
-
-  function renderDefaultRight(){
-    entriesPaneEl.innerHTML = '';
   }
 
   function selectRadical(no){
@@ -349,7 +370,6 @@
     });
     const radical = RADICALS.find(r => r.no === no);
     const entries = ENTRIES.filter(e => e.r === no).sort((a,b) => a.rs - b.rs);
-
     const byRs = {};
     entries.forEach(e => (byRs[e.rs] = byRs[e.rs] || []).push(e));
     const rsKeys = Object.keys(byRs).map(Number).sort((a,b)=>a-b);
@@ -359,22 +379,18 @@
         <div class="big-glyph">${radical.char}${radical.variant ? `<span class="variant-big">${radical.variant}</span>` : ''}</div>
         <div class="meta">部首 ${radical.no} · ${radical.strokes} 画<br>${radical.meaning}</div>
       </div>`;
-
     if (rsKeys.length === 0)
-      html += `<div class="entries-empty">（此部首暂无收字 — no characters yet）</div>`;
-
+      html += `<div class="entries-empty">（此部首暂无收字）</div>`;
     rsKeys.forEach(rs => {
-      html += `<div class="stroke-block">
-        <div class="stroke-block-label">+${rs} 画（部首外笔画）</div>
-        <div class="char-grid">`;
+      html += `<div class="stroke-block"><div class="stroke-block-label">+${rs} 画</div><div class="char-grid">`;
       byRs[rs].forEach(e => { html += `<div class="char-tile" data-word="${e.w}">${e.w}</div>`; });
       html += `</div></div>`;
     });
-
-    entriesPaneEl.innerHTML = html;
-    entriesPaneEl.querySelectorAll('.char-tile').forEach(tile => {
+    radicalPane.innerHTML = html;
+    radicalPane.querySelectorAll('.char-tile').forEach(tile => {
       tile.addEventListener('click', () => showDetail(tile.dataset.word, radical));
     });
+    radicalOverlay.classList.add('show');
   }
 
   function showDetail(word, radical){
@@ -387,15 +403,25 @@
     document.getElementById('detailTotal').textContent = entry.ts ? `Total strokes: ${entry.ts}` : '';
     detailOverlay.classList.add('show');
   }
+
   document.getElementById('detailClose').addEventListener('click', () => detailOverlay.classList.remove('show'));
   detailOverlay.addEventListener('click', e => { if (e.target === detailOverlay) detailOverlay.classList.remove('show'); });
+  document.getElementById('radicalClose').addEventListener('click', () => {
+    radicalOverlay.classList.remove('show');
+    document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
+  });
+  radicalOverlay.addEventListener('click', e => {
+    if (e.target === radicalOverlay){
+      radicalOverlay.classList.remove('show');
+      document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
+    }
+  });
   document.getElementById('prevBtn').addEventListener('click', () => { if (currentPage > 0) goToPage(currentPage - 1); });
   document.getElementById('nextBtn').addEventListener('click', () => { if (currentPage < NUM_PAGES - 1) goToPage(currentPage + 1); });
 
   async function init(){
-    renderLeftPage(currentPage);
+    renderPage(currentPage);
     renderPageNav();
-    renderDefaultRight();
     const { entries, source } = await loadJianziEntries();
     ENTRIES = entries;
     const badge = document.getElementById('dataSourceBadge');
