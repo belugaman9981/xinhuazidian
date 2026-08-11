@@ -94,22 +94,32 @@
     opacity:0.6;
   }
   .radical-row{
-    display:flex; align-items:baseline; gap: 10px;
-    padding: 5px 6px; border-radius: 3px;
+    display:flex; align-items:baseline; gap: 8px;
+    padding: 6px 4px; border-radius: 3px;
     cursor:pointer; transition: background .15s ease;
   }
   .radical-row:hover{ background: rgba(165,49,42,0.08); }
   .radical-row.active{ background: rgba(165,49,42,0.16); }
   .radical-glyph{
     font-family:"Noto Serif SC", serif;
-    font-size: 22px; width: 34px; text-align:center;
+    font-size: 19px;
     color: var(--ink);
+    white-space: nowrap;
+    flex: 0 0 auto;
+    display:flex; align-items:baseline; gap: 3px;
+  }
+  .radical-glyph .variant{
+    font-size: 13px;
+    color: var(--gold);
   }
   .radical-no{
-    font-size: 10px; color: var(--gold); width: 20px;
+    font-size: 10px; color: var(--gold);
+    flex: 0 0 16px;
   }
   .radical-meaning{
-    font-size: 12px; color: var(--ink-soft); font-style: italic;
+    font-size: 11px; color: var(--ink-soft); font-style: italic;
+    flex: 1 1 auto; min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   /* Right page: entries for selected radical */
@@ -117,8 +127,12 @@
     display:flex; align-items:center; gap: 14px; margin-bottom: 6px;
   }
   .entries-head .big-glyph{
-    font-family:"Noto Serif SC", serif; font-size: 44px; color: var(--seal);
-    line-height:1;
+    font-family:"Noto Serif SC", serif; font-size: 40px; color: var(--seal);
+    line-height:1; white-space: nowrap;
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .entries-head .big-glyph .variant-big{
+    font-size: 24px; color: var(--gold);
   }
   .entries-head .meta{ font-size:12px; color: var(--ink-soft); }
   .entries-empty{
@@ -225,6 +239,9 @@
     .spread::after{ display:none; }
     .page.left{ border-bottom: 1px dashed rgba(165,49,42,0.3); }
     .thumb-index{ display:none; }
+    .page{ padding: 24px 18px; }
+    .page-title{ font-size: 19px; letter-spacing: 2px; }
+    .page-sub{ font-size: 11px; letter-spacing: 0.5px; }
   }
 </style>
 </head>
@@ -295,7 +312,7 @@
         row.dataset.radical = r.no;
         row.innerHTML = `
           <span class="radical-no">${r.no}</span>
-          <span class="radical-glyph">${r.char}${r.variant ? ' / '+r.variant : ''}</span>
+          <span class="radical-glyph">${r.char}${r.variant ? `<span class="variant">${r.variant}</span>` : ''}</span>
           <span class="radical-meaning">${r.meaning}</span>`;
         row.addEventListener('click', () => selectRadical(r.no));
         group.appendChild(row);
@@ -330,7 +347,7 @@
 
     let html = `
       <div class="entries-head">
-        <div class="big-glyph">${radical.char}${radical.variant ? ' '+radical.variant : ''}</div>
+        <div class="big-glyph">${radical.char}${radical.variant ? `<span class="variant-big">${radical.variant}</span>` : ''}</div>
         <div class="meta">部首 ${radical.no} · ${radical.strokes} 画<br>${radical.meaning}</div>
       </div>`;
 
