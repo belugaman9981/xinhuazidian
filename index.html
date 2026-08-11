@@ -83,7 +83,7 @@
   .radical-list{
     columns: 4;
     column-gap: 18px;
-    column-fill: balance;
+    column-fill: auto;
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
@@ -107,7 +107,7 @@
   .radical-row.active{ background: rgba(165,49,42,0.16); }
   .radical-glyph{
     font-family:"Noto Serif SC", serif;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--ink);
     white-space: nowrap;
     flex: 0 0 auto;
@@ -313,8 +313,8 @@
   });
   const strokeKeys = Object.keys(byStroke).map(Number).sort((a,b)=>a-b);
 
-  // Page breaks: <=2 / 3 / 4-5 / 6-7 / 8+
-  const PAGE_BREAKS = [2, 3, 5, 7];
+  // Page breaks: <=4 / 5-8 / 9+  →  3 pages (~90 / ~75 / ~50 radicals)
+  const PAGE_BREAKS = [4, 8];
   const NUM_PAGES = PAGE_BREAKS.length + 1;
   function pageIdxForStroke(sk){
     for (let i = 0; i < PAGE_BREAKS.length; i++) if (sk <= PAGE_BREAKS[i]) return i;
