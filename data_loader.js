@@ -22,6 +22,21 @@ async function loadJianziEntries() {
       source: "full",
     };
   } catch (err) {
+    // When opened directly as file://, fetch() is blocked by the browser.
+    // Use the browser-safe full dataset instead of silently dropping to the tiny sample.
+    if (Array.isArray(window.JIANZI_FULL_DATA) && window.JIANZI_FULL_DATA.length) {
+      return {
+        entries: window.JIANZI_FULL_DATA.map(e => ({
+          w: e.word,
+          r: e.radical,
+          rs: e.residual_strokes,
+          ts: e.total_strokes,
+          py: e.pinyin || "",
+          def: e.definition || "(no definition on file)",
+        })),
+        source: "full-inline",
+      };
+    }
     console.warn("[jianzi] Falling back to sample data:", err.message);
     return { entries: window.SAMPLE_ENTRIES, source: "sample" };
   }
