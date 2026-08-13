@@ -267,13 +267,6 @@
     text-align:center; color: rgba(239,228,204,0.55); font-size: 11px;
     margin-top: 14px; letter-spacing: 1px;
   }
-  .data-source-badge{
-    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
-    background: rgba(0,0,0,0.55); color: #f2e8d5; font-size: 11px;
-    padding: 6px 12px; border-radius: 20px; letter-spacing: 0.5px;
-    pointer-events: none; z-index: 5;
-  }
-
   @media (max-width: 820px){
     .spread{ flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
     .page{ width: 100%; height: auto; }
@@ -308,9 +301,7 @@
         <div class="page-number" id="pageNumLeft"></div>
       </div>
       <div class="page page-right">
-        <div class="entries-page" id="entriesPage">
-          <div class="entries-empty">选择左侧部首，或搜索一个字<br><span style="font-size:11px;">Select a radical on the left, or search above</span></div>
-        </div>
+        <div class="entries-page" id="entriesPage"></div>
         <div class="page-number" id="pageNumRight"></div>
       </div>
     </div>
@@ -322,8 +313,6 @@
     </div>
   </div>
 </div>
-
-<div id="dataSourceBadge" class="data-source-badge"></div>
 
 <script src="radicals_full.js"></script>
 <script src="sample_data.js"></script>
@@ -481,7 +470,7 @@
       if (currentRadicalNo){
         renderRadicalPage(currentRadicalNo);
       } else {
-        entriesPageEl.innerHTML = `<div class="entries-empty">选择左侧部首，或搜索一个字<br><span style="font-size:11px;">Select a radical on the left, or search above</span></div>`;
+        entriesPageEl.innerHTML = '';
       }
       return;
     }
@@ -551,12 +540,8 @@
   async function init(){
     renderPage(currentPage);
     renderPageNav();
-    const { entries, source } = await loadJianziEntries();
+    const { entries } = await loadJianziEntries();
     ENTRIES = entries;
-    const badge = document.getElementById('dataSourceBadge');
-    badge.textContent = source === 'full'
-      ? `Full dataset — ${ENTRIES.length.toLocaleString()} characters`
-      : 'Sample data (~50 chars) — run build_unihan_data.py + serve.py for full dictionary';
   }
   init();
 </script>
