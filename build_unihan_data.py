@@ -59,13 +59,19 @@ def parse_kRSUnicode(value):
 
 
 def main():
+    # IMPORTANT: don't pass "fields" here. unihan-etl uses an internal,
+    # hardcoded field->file lookup table to decide which of the 8 Unihan
+    # data files to load when you restrict "fields" — and that table is
+    # stale: it still thinks kRSUnicode lives in Unihan_RadicalStrokeCounts.txt,
+    # but Unicode moved it (along with kTotalStrokes) into Unihan_IRGSources.txt
+    # some releases ago. Restricting "fields" makes it skip that file
+    # entirely and silently produce zero radical/stroke matches.
+    #
+    # Leaving both "fields" and "input_files" at their defaults makes it
+    # load all 8 real data files, so kRSUnicode gets found no matter which
+    # file Unicode currently keeps it in. We just pick the fields we want
+    # back out of the full record below.
     packager = Packager({
-        "fields": [
-            "kRSUnicode",
-            "kTotalStrokes",
-            "kMandarin",
-            "kDefinition",
-        ],
         # Newer unihan-etl only returns the parsed records in-memory when
         # format is "python" — "json"/"csv"/"yaml" write straight to a file
         # on disk instead and export() returns None.
