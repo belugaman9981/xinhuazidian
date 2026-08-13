@@ -85,14 +85,32 @@ def main():
         if not char:
             continue
 
-        radical, residual = parse_kRSUnicode(
-            rec.get("kRSUnicode", [None])[0] if isinstance(rec.get("kRSUnicode"), list) else rec.get("kRSUnicode")
-        )
+        # kRSUnicode, expanded, is a list of dicts:
+        #   [{"radical": 9, "strokes": 5, "simplified": False}, ...]
+        # (older unihan-etl versions gave a raw "9.5" string instead — the
+        # isinstance check below handles both just in case).
+        rs_entries = rec.get("kRSUnicode")
+        if not rs_entries:
+            continue
+        first_rs = rs_entries[0] if isinstance(rs_entries, list) else rs_entries
+
+        if isinstance(first_rs, dict):
+            radical = first_rs.get("radical")
+            residual = first_rs.get("strokes")
+        elif isinstance(first_rs, str):
+            radical, residual = parse_kRSUnicode(first_rs)
+        else:
+            continue
+
         if radical is None:
             continue  # skip entries with no radical/stroke data (rare, mostly obscure symbols)
 
+        # kTotalStrokes, expanded, is {"zh-Hans": int, "zh-Hant": int}
+        # (older versions gave a plain list instead).
         total_strokes = rec.get("kTotalStrokes")
-        if isinstance(total_strokes, list):
+        if isinstance(total_strokes, dict):
+            total_strokes = total_strokes.get("zh-Hans") or total_strokes.get("zh-Hant")
+        elif isinstance(total_strokes, list):
             total_strokes = total_strokes[0] if total_strokes else None
 
         pinyin = rec.get("kMandarin")
