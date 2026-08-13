@@ -542,6 +542,8 @@
     renderPageNav();
     const { entries } = await loadJianziEntries();
     ENTRIES = entries;
+    // Open on a real page, like an actual book, instead of a blank spread.
+    selectRadical(RADICALS[0].no);
   }
   init();
 </script>
