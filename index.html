@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>检字表 · Radical Index</title>
+<title>新华字典 · 部首檢字表</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
 <style>
@@ -33,7 +33,7 @@
   }
   .book{
     position:relative;
-    width:min(1080px, 96vw);
+    width:min(1180px, 97vw);
     background: linear-gradient(180deg, var(--cover) 0%, var(--cover-dark) 100%);
     border-radius: 6px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.04) inset;
@@ -46,143 +46,206 @@
     border-radius: 4px;
     pointer-events:none;
   }
+
+  /* --- search ribbon, tucked into the top of the book like a bookmark --- */
+  .search-ribbon{
+    display:flex; align-items:center; gap: 10px;
+    padding: 4px 10px 12px;
+  }
+  .search-box{
+    flex: 0 1 340px;
+    display:flex; align-items:center; gap: 8px;
+    background: #fff8e8;
+    border: 1px solid rgba(201,168,90,0.5);
+    border-radius: 20px;
+    padding: 7px 14px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  }
+  .search-box svg{ flex: 0 0 auto; opacity:0.55; }
+  .search-box input{
+    border:none; outline:none; background:none;
+    font-family:"Noto Serif SC", serif;
+    font-size: 14px; color: var(--ink);
+    width: 100%;
+  }
+  .search-box input::placeholder{ color: var(--ink-soft); opacity:0.65; font-family:"Noto Serif", serif; font-style: italic; }
+  .search-clear{
+    background:none; border:none; cursor:pointer; color: var(--ink-soft);
+    font-size: 14px; opacity:0.6; padding: 0 2px; display:none;
+  }
+  .search-clear.show{ display:inline; }
+  .search-hint{
+    font-size: 11px; color: rgba(239,228,204,0.55); letter-spacing: 0.5px;
+  }
+
   .spread{
     position:relative;
-    display:block;
+    display:flex;
     background: var(--page);
     border-radius: 2px;
-    height: calc(100vh - 100px);
-    max-height: 860px;
-    min-height: 480px;
+    height: calc(100vh - 148px);
+    max-height: 820px;
+    min-height: 460px;
     box-shadow: inset 0 0 40px rgba(0,0,0,0.12);
     overflow: hidden;
   }
   /* center crease */
   .spread::after{
     content:"";
-    position:absolute; left:50%; top:5%; bottom:5%; width:1px;
-    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.1) 20%, rgba(0,0,0,0.13) 50%, rgba(0,0,0,0.1) 80%, transparent);
+    position:absolute; left:50%; top:0; bottom:0; width:1px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.14) 15%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.14) 85%, transparent);
+    box-shadow: -6px 0 14px -6px rgba(0,0,0,0.18) inset, 6px 0 14px -6px rgba(0,0,0,0.18) inset;
     pointer-events:none; z-index:1;
   }
-  .page{ padding: 22px 28px; position:relative; display:flex; flex-direction:column; height:100%; box-sizing:border-box; }
+  .page{
+    flex: 1 1 50%;
+    width: 50%;
+    padding: 20px 26px 30px;
+    position:relative;
+    display:flex; flex-direction:column;
+    height:100%; box-sizing:border-box;
+    transition: opacity .15s ease;
+  }
+  .page-left{ padding-right: 20px; }
+  .page-right{ padding-left: 20px; }
+
+  .page-running-head{
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--ink-soft); opacity: 0.65; margin-bottom: 2px;
+  }
   .page-title{
     font-family:"Noto Serif SC", serif;
     font-weight:700;
-    font-size: 22px;
+    font-size: 20px;
     letter-spacing: 3px;
     color: var(--seal-dark);
     margin: 0 0 4px 0;
   }
   .page-sub{
-    font-size: 12px;
+    font-size: 11px;
     color: var(--ink-soft);
     letter-spacing: 1px;
     margin-bottom: 10px;
     text-transform: uppercase;
   }
+
+  /* ---------------- LEFT PAGE: radical index ---------------- */
   .radical-list{
-    columns: 4;
-    column-gap: 18px;
+    columns: 3;
+    column-gap: 16px;
     column-fill: balance;
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
   }
-  .stroke-group{ margin-bottom: 10px; }
+  .stroke-group{ margin-bottom: 9px; break-inside: avoid; }
   .stroke-group-label{
-    font-size: 11px; color: var(--seal-dark);
-    letter-spacing: 2px; margin: 8px 0 4px 0;
+    font-size: 10px; color: var(--seal-dark);
+    letter-spacing: 2px; margin: 6px 0 3px 0;
     font-weight: 700;
     border-bottom: 1px solid rgba(165,49,42,0.3);
-    padding-bottom: 3px;
+    padding-bottom: 2px;
     break-after: avoid;
   }
   .radical-row{
-    display:flex; align-items:center; gap: 8px;
-    padding: 3px 4px; border-radius: 2px;
+    display:flex; align-items:center; gap: 7px;
+    padding: 2px 4px; border-radius: 2px;
     cursor:pointer; transition: background .15s ease;
-    line-height: 1.4;
+    line-height: 1.35;
   }
   .radical-row:hover{ background: rgba(165,49,42,0.08); }
   .radical-row.active{ background: rgba(165,49,42,0.16); }
   .radical-glyph{
     font-family:"Noto Serif SC", serif;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--ink);
     white-space: nowrap;
     flex: 0 0 auto;
     display:flex; align-items:baseline; gap: 3px;
   }
-  .radical-glyph .variant{ font-size: 13px; color: var(--gold); }
-  .radical-no{ font-size: 11px; color: var(--ink-soft); flex: 0 0 26px; text-align: right; }
-  .radical-meaning{ display: none; }
+  .radical-glyph .variant{ font-size: 12px; color: var(--gold); }
+  .radical-no{ font-size: 10px; color: var(--ink-soft); flex: 0 0 22px; text-align: right; }
 
-  /* Right page: entries for selected radical */
+  /* ---------------- RIGHT PAGE: dictionary body ---------------- */
+  .entries-page{ flex: 1 1 0; min-height: 0; display:flex; flex-direction:column; }
   .entries-head{
-    display:flex; align-items:center; gap: 14px; margin-bottom: 6px;
+    display:flex; align-items:baseline; gap: 12px; margin-bottom: 4px;
+    padding-bottom: 8px; border-bottom: 1.5px solid rgba(165,49,42,0.35);
   }
   .entries-head .big-glyph{
-    font-family:"Noto Serif SC", serif; font-size: 40px; color: var(--seal);
+    font-family:"Noto Serif SC", serif; font-size: 34px; color: var(--seal);
     line-height:1; white-space: nowrap;
-    display:flex; align-items:baseline; gap:6px;
+    display:flex; align-items:baseline; gap:5px;
   }
-  .entries-head .big-glyph .variant-big{
-    font-size: 24px; color: var(--gold);
-  }
-  .entries-head .meta{ font-size:12px; color: var(--ink-soft); }
+  .entries-head .big-glyph .variant-big{ font-size: 20px; color: var(--gold); }
+  .entries-head .meta{ font-size:11px; color: var(--ink-soft); line-height:1.5; }
   .entries-empty{
     margin-top: 40px; text-align:center; color: var(--ink-soft);
     font-style: italic; font-size: 13px;
   }
-  .stroke-block{ margin-top: 16px; }
+  .entries-body{ flex: 1 1 0; overflow-y: auto; padding-right: 2px; }
+  .entries-body::-webkit-scrollbar{ width: 5px; }
+  .entries-body::-webkit-scrollbar-thumb{ background: rgba(165,49,42,0.25); border-radius: 4px; }
+
+  .stroke-block{ margin-top: 12px; break-inside: avoid; }
   .stroke-block-label{
-    font-size: 11px; color: var(--seal-dark); letter-spacing:2px;
-    margin-bottom: 6px;
+    font-size: 10px; color: var(--seal-dark); letter-spacing:2px;
+    margin-bottom: 4px; font-weight: 700;
   }
-  .char-grid{
-    display:flex; flex-wrap:wrap; gap: 8px;
+  .dict-entries{ columns: 2; column-gap: 20px; }
+  .dict-entry{
+    break-inside: avoid;
+    padding: 3px 4px 5px 0;
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 1.5;
   }
-  .char-tile{
-    width: 46px; height: 46px;
-    display:flex; align-items:center; justify-content:center;
-    font-family:"Noto Serif SC", serif; font-size: 22px;
-    background: #fff8e8;
-    border: 1px solid rgba(165,49,42,0.25);
-    border-radius: 3px;
-    cursor:pointer;
-    transition: transform .12s ease, box-shadow .12s ease;
+  .dict-entry:hover{ background: rgba(165,49,42,0.06); }
+  .dict-entry.flash{ background: rgba(165,49,42,0.22); }
+  .dict-entry .headword{
+    font-family:"Noto Serif SC", serif; font-weight: 700;
+    font-size: 16px; color: var(--ink);
   }
-  .char-tile:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-    border-color: var(--seal);
+  .dict-entry .head-pinyin{
+    font-size: 12px; color: var(--seal-dark); margin-left: 6px; font-style: italic;
   }
-
-  .thumb-index{ display: none; }
-
-  /* entries popup overlay */
-  .radical-overlay{
-    position:fixed; inset:0; background: rgba(15,10,8,0.55);
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none; transition: opacity .18s ease;
-    z-index: 8;
+  .dict-entry .head-strokes{
+    font-size: 10px; color: var(--gold); margin-left: 5px;
   }
-  .radical-overlay.show{ opacity:1; pointer-events:auto; }
-  .radical-card{
-    width: min(560px, 90vw); max-height: 80vh;
-    background: #fff8e8; border-radius: 6px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    padding: 26px 24px; position:relative; overflow-y: auto;
-    border: 1px solid rgba(165,49,42,0.25);
-    transform: translateY(10px) scale(0.98); transition: transform .18s ease;
-  }
-  .radical-overlay.show .radical-card{ transform: translateY(0) scale(1); }
-  .radical-close{
-    position:absolute; top:10px; right:14px;
-    font-size: 18px; color: var(--ink-soft); cursor:pointer; background:none; border:none;
+  .dict-entry .head-def{
+    display:block; font-size: 12px; color: var(--ink-soft); margin-top: 1px;
   }
 
-  /* page flip navigation */
+  /* search results, rendered on the right page in the same dictionary style */
+  .search-meta{ font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
+  .search-group-label{
+    font-size: 10px; color: var(--seal-dark); letter-spacing: 2px;
+    font-weight: 700; margin: 10px 0 4px; break-after: avoid;
+  }
+
+  /* page number, bottom corner of every page — like a real printed book */
+  .page-number{
+    position:absolute; bottom: 8px; font-size: 10px; color: var(--ink-soft);
+    opacity: 0.55; letter-spacing: 1px;
+  }
+  .page-left .page-number{ left: 26px; }
+  .page-right .page-number{ right: 26px; }
+
+  /* page-turn flip effect */
+  .spread.flipping .page-left{ animation: leafOut .34s ease; }
+  .spread.flipping .page-right{ animation: leafIn .34s ease; }
+  @keyframes leafOut{
+    0%{ opacity:1; transform: none; }
+    45%{ opacity:0.15; transform: perspective(1400px) rotateY(-6deg) scale(0.99); }
+    100%{ opacity:1; transform: none; }
+  }
+  @keyframes leafIn{
+    0%{ opacity:1; transform: none; }
+    45%{ opacity:0.15; transform: perspective(1400px) rotateY(6deg) scale(0.99); }
+    100%{ opacity:1; transform: none; }
+  }
+
+  /* page flip navigation (left-page index pager) */
   .page-nav{
     display:flex; align-items:center; justify-content:center; gap: 22px;
     padding: 10px 0 4px;
@@ -200,44 +263,6 @@
     font-family:"Noto Serif SC", serif;
   }
 
-  /* detail overlay — like a slipped-in page */
-  .detail-overlay{
-    position:fixed; inset:0; background: rgba(15,10,8,0.55);
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; pointer-events:none; transition: opacity .18s ease;
-    z-index: 10;
-  }
-  .detail-overlay.show{ opacity:1; pointer-events:auto; }
-  .detail-card{
-    width: min(360px, 88vw);
-    background: #fff8e8;
-    border-radius: 6px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    padding: 26px 24px;
-    position:relative;
-    transform: translateY(10px) scale(0.98);
-    transition: transform .18s ease;
-    border: 1px solid rgba(165,49,42,0.25);
-  }
-  .detail-overlay.show .detail-card{ transform: translateY(0) scale(1); }
-  .detail-close{
-    position:absolute; top:10px; right:14px;
-    font-size: 18px; color: var(--ink-soft); cursor:pointer; background:none; border:none;
-  }
-  .detail-glyph{
-    font-family:"Noto Serif SC", serif; font-size: 64px; color: var(--seal);
-    text-align:center; line-height:1;
-  }
-  .detail-pinyin{ text-align:center; font-size: 18px; color: var(--ink-soft); margin: 6px 0 2px; }
-  .detail-def{ text-align:center; font-size: 14px; margin-top: 10px; color: var(--ink); }
-  .detail-radical-line{
-    text-align:center; font-size: 11px; color: var(--gold); margin-top: 14px;
-    letter-spacing: 1px;
-  }
-  .detail-total{
-    text-align:center; font-size: 11px; color: var(--ink-soft); margin-top: 4px;
-  }
-
   .footer-note{
     text-align:center; color: rgba(239,228,204,0.55); font-size: 11px;
     margin-top: 14px; letter-spacing: 1px;
@@ -249,10 +274,14 @@
     pointer-events: none; z-index: 5;
   }
 
-  @media (max-width: 720px){
-    .spread{ height: auto; min-height: 100vh; overflow: visible; }
-    .page{ height: auto; }
+  @media (max-width: 820px){
+    .spread{ flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
+    .page{ width: 100%; height: auto; }
+    .page-left{ padding-right: 26px; border-bottom: 8px solid rgba(0,0,0,0.06); }
     .radical-list{ columns: 2; flex: none; overflow: visible; }
+    .dict-entries{ columns: 1; }
+    .spread::after{ display:none; }
+    .page-number{ position: static; margin-top: 8px; text-align: right; }
   }
 </style>
 </head>
@@ -260,13 +289,32 @@
 
 <div class="stage">
   <div class="book">
-    <div class="spread">
-      <div class="page">
-        <div class="page-title">部首檢字表</div>
-        <div class="page-sub">(一) 部首目錄 · click a radical</div>
+
+    <div class="search-ribbon">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="查字 / 拼音 / meaning…" autocomplete="off">
+        <button class="search-clear" id="searchClear">&times;</button>
+      </div>
+      <span class="search-hint" id="searchHint"></span>
+    </div>
+
+    <div class="spread" id="spread">
+      <div class="page page-left">
+        <div class="page-running-head">部首檢字表 · Radical Index</div>
+        <div class="page-title">部首目錄</div>
+        <div class="page-sub">(一) click a radical to open the facing page</div>
         <div id="radicalList" class="radical-list"></div>
+        <div class="page-number" id="pageNumLeft"></div>
+      </div>
+      <div class="page page-right">
+        <div class="entries-page" id="entriesPage">
+          <div class="entries-empty">选择左侧部首，或搜索一个字<br><span style="font-size:11px;">Select a radical on the left, or search above</span></div>
+        </div>
+        <div class="page-number" id="pageNumRight"></div>
       </div>
     </div>
+
     <div class="page-nav">
       <button class="nav-btn" id="prevBtn">&#8249;</button>
       <span class="page-counter" id="pageCounter"></span>
@@ -275,37 +323,23 @@
   </div>
 </div>
 
-<div id="detailOverlay" class="detail-overlay">
-  <div class="detail-card">
-    <button class="detail-close" id="detailClose">&times;</button>
-    <div class="detail-glyph" id="detailGlyph"></div>
-    <div class="detail-pinyin" id="detailPinyin"></div>
-    <div class="detail-def" id="detailDef"></div>
-    <div class="detail-radical-line" id="detailRadicalLine"></div>
-    <div class="detail-total" id="detailTotal"></div>
-  </div>
-</div>
 <div id="dataSourceBadge" class="data-source-badge"></div>
-
-<div id="radicalOverlay" class="radical-overlay">
-  <div class="radical-card">
-    <button class="radical-close" id="radicalClose">&times;</button>
-    <div id="radicalPane"></div>
-  </div>
-</div>
 
 <script src="radicals_full.js"></script>
 <script src="sample_data.js"></script>
 <script src="data_loader.js"></script>
 <script>
   const radicalListEl  = document.getElementById('radicalList');
-  const radicalOverlay = document.getElementById('radicalOverlay');
-  const radicalPane    = document.getElementById('radicalPane');
-  const detailOverlay  = document.getElementById('detailOverlay');
+  const entriesPageEl  = document.getElementById('entriesPage');
+  const spreadEl        = document.getElementById('spread');
+  const searchInput     = document.getElementById('searchInput');
+  const searchClear     = document.getElementById('searchClear');
+  const searchHint      = document.getElementById('searchHint');
 
   const RADICALS = KANGXI_RADICALS_FULL;
   let ENTRIES = [];
   let currentPage = 0;
+  let currentRadicalNo = null;
 
   const byStroke = {};
   RADICALS.forEach(r => {
@@ -346,6 +380,8 @@
       });
       radicalListEl.appendChild(group);
     });
+    document.getElementById('pageNumLeft').textContent = (p * 2 + 1);
+    document.getElementById('pageNumRight').textContent = (p * 2 + 2);
   }
 
   function renderPageNav(){
@@ -357,17 +393,37 @@
       lo === hi ? strokeLabel(lo) : strokeLabel(lo) + ' — ' + strokeLabel(hi);
   }
 
-  function goToPage(p){
+  function goToPage(p, { silent } = {}){
     currentPage = p;
+    if (!silent){
+      spreadEl.classList.add('flipping');
+      setTimeout(() => spreadEl.classList.remove('flipping'), 340);
+    }
     renderPage(p);
     renderPageNav();
-    document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
+    highlightActiveRadical();
   }
 
-  function selectRadical(no){
+  function highlightActiveRadical(){
     document.querySelectorAll('.radical-row').forEach(el => {
-      el.classList.toggle('active', Number(el.dataset.radical) === no);
+      el.classList.toggle('active', Number(el.dataset.radical) === currentRadicalNo);
     });
+  }
+
+  // Build the facing-page dictionary entries for one radical, in the
+  // running style of a real Xinhua Zidian body page: headword, pinyin,
+  // total-stroke count, then the gloss — grouped by residual strokes,
+  // same grouping the 检字表 index itself uses.
+  function dictEntryHTML(e){
+    const strokes = e.ts ? `<span class="head-strokes">共${e.ts}画</span>` : '';
+    return `
+      <div class="dict-entry" data-word="${e.w}">
+        <span class="headword">${e.w}</span><span class="head-pinyin">${e.py}</span>${strokes}
+        <span class="head-def">${e.def}</span>
+      </div>`;
+  }
+
+  function renderRadicalPage(no, { highlightWord } = {}){
     const radical = RADICALS.find(r => r.no === no);
     const entries = ENTRIES.filter(e => e.r === no).sort((a,b) => a.rs - b.rs);
     const byRs = {};
@@ -377,47 +433,120 @@
     let html = `
       <div class="entries-head">
         <div class="big-glyph">${radical.char}${radical.variant ? `<span class="variant-big">${radical.variant}</span>` : ''}</div>
-        <div class="meta">部首 ${radical.no} · ${radical.strokes} 画<br>${radical.meaning}</div>
-      </div>`;
-    if (rsKeys.length === 0)
+        <div class="meta">部首 ${radical.no} · ${radical.strokes} 画 · ${radical.pinyin}<br>${radical.meaning}</div>
+      </div>
+      <div class="entries-body">`;
+    if (rsKeys.length === 0){
       html += `<div class="entries-empty">（此部首暂无收字）</div>`;
-    rsKeys.forEach(rs => {
-      html += `<div class="stroke-block"><div class="stroke-block-label">+${rs} 画</div><div class="char-grid">`;
-      byRs[rs].forEach(e => { html += `<div class="char-tile" data-word="${e.w}">${e.w}</div>`; });
-      html += `</div></div>`;
-    });
-    radicalPane.innerHTML = html;
-    radicalPane.querySelectorAll('.char-tile').forEach(tile => {
-      tile.addEventListener('click', () => showDetail(tile.dataset.word, radical));
-    });
-    radicalOverlay.classList.add('show');
-  }
-
-  function showDetail(word, radical){
-    const entry = ENTRIES.find(e => e.w === word);
-    document.getElementById('detailGlyph').textContent = entry.w;
-    document.getElementById('detailPinyin').textContent = entry.py;
-    document.getElementById('detailDef').textContent = entry.def;
-    document.getElementById('detailRadicalLine').textContent =
-      `部首 ${radical.char} (${radical.no}) · +${entry.rs} 画`;
-    document.getElementById('detailTotal').textContent = entry.ts ? `Total strokes: ${entry.ts}` : '';
-    detailOverlay.classList.add('show');
-  }
-
-  document.getElementById('detailClose').addEventListener('click', () => detailOverlay.classList.remove('show'));
-  detailOverlay.addEventListener('click', e => { if (e.target === detailOverlay) detailOverlay.classList.remove('show'); });
-  document.getElementById('radicalClose').addEventListener('click', () => {
-    radicalOverlay.classList.remove('show');
-    document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
-  });
-  radicalOverlay.addEventListener('click', e => {
-    if (e.target === radicalOverlay){
-      radicalOverlay.classList.remove('show');
-      document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
+    } else {
+      rsKeys.forEach(rs => {
+        html += `<div class="stroke-block"><div class="stroke-block-label">+${rs} 画</div><div class="dict-entries">`;
+        byRs[rs].forEach(e => { html += dictEntryHTML(e); });
+        html += `</div></div>`;
+      });
     }
-  });
+    html += `</div>`;
+    entriesPageEl.innerHTML = html;
+
+    if (highlightWord){
+      const tile = entriesPageEl.querySelector(`.dict-entry[data-word="${highlightWord}"]`);
+      if (tile){
+        tile.classList.add('flash');
+        tile.scrollIntoView({ block: 'center' });
+        setTimeout(() => tile.classList.remove('flash'), 1400);
+      }
+    }
+  }
+
+  function selectRadical(no, opts){
+    currentRadicalNo = no;
+    highlightActiveRadical();
+    renderRadicalPage(no, opts);
+  }
+
   document.getElementById('prevBtn').addEventListener('click', () => { if (currentPage > 0) goToPage(currentPage - 1); });
   document.getElementById('nextBtn').addEventListener('click', () => { if (currentPage < NUM_PAGES - 1) goToPage(currentPage + 1); });
+
+  // ---------------- search ----------------
+  function stripTones(s){
+    return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+  const isHanChar = ch => /[\u4e00-\u9fff]/.test(ch);
+
+  function runSearch(qRaw){
+    const q = qRaw.trim();
+    searchClear.classList.toggle('show', q.length > 0);
+    if (!q){
+      searchHint.textContent = '';
+      if (currentRadicalNo){
+        renderRadicalPage(currentRadicalNo);
+      } else {
+        entriesPageEl.innerHTML = `<div class="entries-empty">选择左侧部首，或搜索一个字<br><span style="font-size:11px;">Select a radical on the left, or search above</span></div>`;
+      }
+      return;
+    }
+
+    const qHan = [...q].filter(isHanChar);
+    const qLatin = stripTones(q);
+
+    let results;
+    if (qHan.length){
+      results = ENTRIES.filter(e => qHan.includes(e.w));
+    } else {
+      results = ENTRIES.filter(e =>
+        stripTones(e.py).includes(qLatin) ||
+        (e.def || '').toLowerCase().includes(qLatin)
+      ).slice(0, 200);
+    }
+
+    searchHint.textContent = results.length ? `${results.length} found` : 'no matches';
+    document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
+
+    if (!results.length){
+      entriesPageEl.innerHTML = `<div class="entries-empty">未找到「${q}」<br><span style="font-size:11px;">No matches for "${q}"</span></div>`;
+      return;
+    }
+
+    const byRadical = {};
+    results.forEach(e => (byRadical[e.r] = byRadical[e.r] || []).push(e));
+    const radicalKeys = Object.keys(byRadical).map(Number).sort((a,b)=>a-b);
+
+    let html = `<div class="search-meta">「${q}」 — ${results.length} result${results.length===1?'':'s'}</div><div class="entries-body">`;
+    radicalKeys.forEach(rno => {
+      const radical = RADICALS.find(r => r.no === rno);
+      html += `<div class="search-group-label">部首 ${radical.char} (${rno})</div><div class="dict-entries">`;
+      byRadical[rno].forEach(e => { html += dictEntryHTML(e); });
+      html += `</div>`;
+    });
+    html += `</div>`;
+    entriesPageEl.innerHTML = html;
+  }
+
+  entriesPageEl.addEventListener('click', (e) => {
+    const tile = e.target.closest('.dict-entry');
+    if (!tile) return;
+    const entry = ENTRIES.find(x => x.w === tile.dataset.word);
+    if (!entry) return;
+    // jump the left index to this character's radical page and open it
+    const sk = RADICALS.find(r => r.no === entry.r).strokes;
+    const targetPage = pageIdxForStroke(sk);
+    if (targetPage !== currentPage) goToPage(targetPage, { silent: true });
+    searchInput.value = '';
+    searchClear.classList.remove('show');
+    searchHint.textContent = '';
+    selectRadical(entry.r, { highlightWord: entry.w });
+  });
+
+  let searchDebounce;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => runSearch(searchInput.value), 120);
+  });
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    runSearch('');
+    searchInput.focus();
+  });
 
   async function init(){
     renderPage(currentPage);
