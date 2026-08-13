@@ -66,10 +66,18 @@ def main():
             "kMandarin",
             "kDefinition",
         ],
-        "format": "json",
+        # Newer unihan-etl only returns the parsed records in-memory when
+        # format is "python" — "json"/"csv"/"yaml" write straight to a file
+        # on disk instead and export() returns None.
+        "format": "python",
     })
     packager.download()
     records = packager.export()
+    if not records:
+        raise SystemExit(
+            "unihan-etl returned no records — check that the Unihan.zip "
+            "download completed (see the cache dir printed above)."
+        )
 
     out = []
     for rec in records:
