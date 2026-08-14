@@ -414,12 +414,22 @@
   // running style of a real Xinhua Zidian body page: headword, pinyin,
   // total-stroke count, then the gloss — grouped by residual strokes,
   // same grouping the 检字表 index itself uses.
+  function escHtml(s){
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function dictEntryHTML(e){
     const strokes = e.ts ? `<span class="head-strokes">共${e.ts}画</span>` : '';
+    const pinyin = e.py ? `<span class="head-pinyin">${escHtml(e.py)}</span>` : '';
     return `
-      <div class="dict-entry" data-word="${e.w}">
-        <span class="headword">${e.w}</span><span class="head-pinyin">${e.py}</span>${strokes}
-        <span class="head-def">${e.def}</span>
+      <div class="dict-entry" data-word="${escHtml(e.w)}">
+        <span class="headword">${escHtml(e.w)}</span>${pinyin}${strokes}
+        <span class="head-def">${escHtml(e.def)}</span>
       </div>`;
   }
 

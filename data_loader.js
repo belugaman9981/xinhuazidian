@@ -16,7 +16,7 @@ async function loadJianziEntries() {
         r: e.radical,
         rs: e.residual_strokes,
         ts: e.total_strokes,
-        py: e.pinyin || "",
+        py: e.pinyin || e.py || "",
         def: e.definition || "(no definition on file)",
       })),
       source: "full",

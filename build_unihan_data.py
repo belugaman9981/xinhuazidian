@@ -58,12 +58,47 @@ def parse_kRSUnicode(value):
     return int(match.group(1)), int(match.group(2))
 
 
+def first_string(value):
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        for item in value:
+            got = first_string(item)
+            if got:
+                return got
+    if isinstance(value, dict):
+        for key in ("zh-Hans", "zh-Hant"):
+            got = first_string(value.get(key))
+            if got:
+                return got
+        for item in value.values():
+            got = first_string(item)
+            if got:
+                return got
+    return None
+
+
+def normalize_pinyin(value):
+    if not value:
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    text = text.replace(",", " ").replace(";", " ")
+    for token in text.split():
+        clean = token.rsplit(":", 1)[-1].strip()
+        if clean:
+            return clean
+    return None
+
+
 def main():
     packager = Packager({
         "fields": [
             "kRSUnicode",
             "kTotalStrokes",
             "kMandarin",
+            "kHanyuPinyin",
             "kDefinition",
         ],
         "format": "json",
@@ -87,11 +122,9 @@ def main():
         if isinstance(total_strokes, list):
             total_strokes = total_strokes[0] if total_strokes else None
 
-        pinyin = rec.get("kMandarin")
-        if isinstance(pinyin, dict):
-            pinyin = pinyin.get("zh-Hans") or pinyin.get("zh-Hant")
-        elif isinstance(pinyin, list):
-            pinyin = pinyin[0] if pinyin else None
+        pinyin = normalize_pinyin(first_string(rec.get("kMandarin")))
+        if not pinyin:
+            pinyin = normalize_pinyin(first_string(rec.get("kHanyuPinyin")))
 
         definition = rec.get("kDefinition")
         if isinstance(definition, list):
