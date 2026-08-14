@@ -38,6 +38,6 @@ async function loadJianziEntries() {
       };
     }
     console.warn("[jianzi] Falling back to sample data:", err.message);
-    return { entries: window.SAMPLE_ENTRIES, source: "sample" };
+    return { entries: SAMPLE_ENTRIES, source: "sample" };
   }
 }

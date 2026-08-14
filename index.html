@@ -108,10 +108,12 @@
   }
   .page-left{ padding-right: 20px; }
   .page-right{ padding-left: 20px; }
+  .page-content{ flex: 1 1 0; min-height: 0; display:flex; flex-direction:column; }
 
   .page-running-head{
     font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
     color: var(--ink-soft); opacity: 0.65; margin-bottom: 2px;
+    flex: 0 0 auto;
   }
   .page-title{
     font-family:"Noto Serif SC", serif;
@@ -120,6 +122,7 @@
     letter-spacing: 3px;
     color: var(--seal-dark);
     margin: 0 0 4px 0;
+    flex: 0 0 auto;
   }
   .page-sub{
     font-size: 11px;
@@ -127,9 +130,10 @@
     letter-spacing: 1px;
     margin-bottom: 10px;
     text-transform: uppercase;
+    flex: 0 0 auto;
   }
 
-  /* ---------------- LEFT PAGE: radical index ---------------- */
+  /* ---------------- 部首目錄 (radical index) pages ---------------- */
   .radical-list{
     columns: 3;
     column-gap: 16px;
@@ -138,7 +142,6 @@
     min-height: 0;
     overflow: hidden;
   }
-  .stroke-group{ margin-bottom: 9px; break-inside: avoid; }
   .stroke-group-label{
     font-size: 10px; color: var(--seal-dark);
     letter-spacing: 2px; margin: 6px 0 3px 0;
@@ -146,12 +149,14 @@
     border-bottom: 1px solid rgba(165,49,42,0.3);
     padding-bottom: 2px;
     break-after: avoid;
+    break-inside: avoid;
   }
   .radical-row{
     display:flex; align-items:center; gap: 7px;
     padding: 2px 4px; border-radius: 2px;
     cursor:pointer; transition: background .15s ease;
     line-height: 1.35;
+    break-inside: avoid;
   }
   .radical-row:hover{ background: rgba(165,49,42,0.08); }
   .radical-row.active{ background: rgba(165,49,42,0.16); }
@@ -165,12 +170,13 @@
   }
   .radical-glyph .variant{ font-size: 12px; color: var(--gold); }
   .radical-no{ font-size: 10px; color: var(--ink-soft); flex: 0 0 22px; text-align: right; }
+  .radical-row.dim{ opacity: 0.4; cursor: default; }
 
-  /* ---------------- RIGHT PAGE: dictionary body ---------------- */
-  .entries-page{ flex: 1 1 0; min-height: 0; display:flex; flex-direction:column; }
+  /* ---------------- 檢字表 (character index) pages ---------------- */
   .entries-head{
     display:flex; align-items:baseline; gap: 12px; margin-bottom: 4px;
     padding-bottom: 8px; border-bottom: 1.5px solid rgba(165,49,42,0.35);
+    flex: 0 0 auto;
   }
   .entries-head .big-glyph{
     font-family:"Noto Serif SC", serif; font-size: 34px; color: var(--seal);
@@ -183,28 +189,32 @@
     margin-top: 40px; text-align:center; color: var(--ink-soft);
     font-style: italic; font-size: 13px;
   }
-  .entries-body{ flex: 1 1 0; overflow-y: auto; padding-right: 2px; }
-  .entries-body::-webkit-scrollbar{ width: 5px; }
-  .entries-body::-webkit-scrollbar-thumb{ background: rgba(165,49,42,0.25); border-radius: 4px; }
+  .entries-body{ flex: 1 1 0; overflow: hidden; padding-right: 2px; min-height:0; }
 
-  .stroke-block{ margin-top: 12px; break-inside: avoid; }
   .stroke-block-label{
     font-size: 10px; color: var(--seal-dark); letter-spacing:2px;
-    margin-bottom: 4px; font-weight: 700;
+    margin: 9px 0 4px; font-weight: 700;
+    break-after: avoid;
   }
-  .dict-entries{ columns: 2; column-gap: 20px; }
+  .search-group-label{
+    font-size: 10px; color: var(--seal-dark); letter-spacing: 2px;
+    font-weight: 700; margin: 10px 0 4px; break-after: avoid;
+  }
+  .search-result-heading{
+    font-size: 11px; color: var(--ink-soft); margin-bottom: 6px;
+  }
   .dict-entry{
     break-inside: avoid;
-    padding: 3px 4px 5px 0;
+    padding: 2px 4px 3px 0;
     cursor: pointer;
     border-radius: 2px;
-    line-height: 1.5;
+    line-height: 1.38;
   }
   .dict-entry:hover{ background: rgba(165,49,42,0.06); }
   .dict-entry.flash{ background: rgba(165,49,42,0.22); }
   .dict-entry .headword{
     font-family:"Noto Serif SC", serif; font-weight: 700;
-    font-size: 16px; color: var(--ink);
+    font-size: 15px; color: var(--ink);
   }
   .dict-entry .head-pinyin{
     font-size: 12px; color: var(--seal-dark); margin-left: 6px; font-style: italic;
@@ -213,14 +223,7 @@
     font-size: 10px; color: var(--gold); margin-left: 5px;
   }
   .dict-entry .head-def{
-    display:block; font-size: 12px; color: var(--ink-soft); margin-top: 1px;
-  }
-
-  /* search results, rendered on the right page in the same dictionary style */
-  .search-meta{ font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
-  .search-group-label{
-    font-size: 10px; color: var(--seal-dark); letter-spacing: 2px;
-    font-weight: 700; margin: 10px 0 4px; break-after: avoid;
+    display:block; font-size: 11px; color: var(--ink-soft); margin-top: 1px;
   }
 
   /* page number, bottom corner of every page — like a real printed book */
@@ -245,7 +248,6 @@
     100%{ opacity:1; transform: none; }
   }
 
-  /* page flip navigation (left-page index pager) */
   .page-nav{
     display:flex; align-items:center; justify-content:center; gap: 22px;
     padding: 10px 0 4px;
@@ -259,20 +261,15 @@
   .nav-btn:disabled{ opacity: 0.18; cursor:default; }
   .page-counter{
     font-size: 11px; color: rgba(239,228,204,0.55); letter-spacing: 1px;
-    min-width: 90px; text-align:center;
+    min-width: 130px; text-align:center;
     font-family:"Noto Serif SC", serif;
   }
 
-  .footer-note{
-    text-align:center; color: rgba(239,228,204,0.55); font-size: 11px;
-    margin-top: 14px; letter-spacing: 1px;
-  }
   @media (max-width: 820px){
     .spread{ flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
     .page{ width: 100%; height: auto; }
     .page-left{ padding-right: 26px; border-bottom: 8px solid rgba(0,0,0,0.06); }
     .radical-list{ columns: 2; flex: none; overflow: visible; }
-    .dict-entries{ columns: 1; }
     .spread::after{ display:none; }
     .page-number{ position: static; margin-top: 8px; text-align: right; }
   }
@@ -294,14 +291,11 @@
 
     <div class="spread" id="spread">
       <div class="page page-left">
-        <div class="page-running-head">部首檢字表 · Radical Index</div>
-        <div class="page-title">部首目錄</div>
-        <div class="page-sub">(一) click a radical to open the facing page</div>
-        <div id="radicalList" class="radical-list"></div>
+        <div class="page-content" id="pageLeftContent"></div>
         <div class="page-number" id="pageNumLeft"></div>
       </div>
       <div class="page page-right">
-        <div class="entries-page" id="entriesPage"></div>
+        <div class="page-content" id="pageRightContent"></div>
         <div class="page-number" id="pageNumRight"></div>
       </div>
     </div>
@@ -319,91 +313,125 @@
 <script src="jianzi_data.js"></script>
 <script src="data_loader.js"></script>
 <script>
-  const radicalListEl  = document.getElementById('radicalList');
-  const entriesPageEl  = document.getElementById('entriesPage');
-  const spreadEl        = document.getElementById('spread');
-  const searchInput     = document.getElementById('searchInput');
-  const searchClear     = document.getElementById('searchClear');
-  const searchHint      = document.getElementById('searchHint');
+  const pageLeftContent  = document.getElementById('pageLeftContent');
+  const pageRightContent = document.getElementById('pageRightContent');
+  const spreadEl         = document.getElementById('spread');
+  const searchInput      = document.getElementById('searchInput');
+  const searchClear      = document.getElementById('searchClear');
+  const searchHint       = document.getElementById('searchHint');
+  const pageNumLeftEl    = document.getElementById('pageNumLeft');
+  const pageNumRightEl   = document.getElementById('pageNumRight');
+  const pageCounterEl    = document.getElementById('pageCounter');
+  const prevBtn          = document.getElementById('prevBtn');
+  const nextBtn          = document.getElementById('nextBtn');
 
   const RADICALS = KANGXI_RADICALS_FULL;
   let ENTRIES = [];
-  let currentPage = 0;
-  let currentRadicalNo = null;
+  let PAGES = [];            // the whole book, in flip order: 部首目录 pages, then 检字表 pages
+  let currentPageIdx = 0;
+  let pendingHighlightWord = null;
 
   const byStroke = {};
-  RADICALS.forEach(r => {
-    (byStroke[r.strokes] = byStroke[r.strokes] || []).push(r);
-  });
+  RADICALS.forEach(r => { (byStroke[r.strokes] = byStroke[r.strokes] || []).push(r); });
   const strokeKeys = Object.keys(byStroke).map(Number).sort((a,b)=>a-b);
 
-  // Page breaks: <=4 / 5-8 / 9+  →  3 pages (~90 / ~75 / ~50 radicals)
+  // 部首目录 page breaks: <=4 / 5-8 / 9+  →  3 spreads
   const PAGE_BREAKS = [4, 8];
-  const NUM_PAGES = PAGE_BREAKS.length + 1;
-  function pageIdxForStroke(sk){
+  const NUM_INDEX_PAGES = PAGE_BREAKS.length + 1;
+  function indexGroupForStroke(sk){
     for (let i = 0; i < PAGE_BREAKS.length; i++) if (sk <= PAGE_BREAKS[i]) return i;
     return PAGE_BREAKS.length;
   }
-  function strokesForPage(p){ return strokeKeys.filter(sk => pageIdxForStroke(sk) === p); }
+  function strokesForIndexGroup(g){ return strokeKeys.filter(sk => indexGroupForStroke(sk) === g); }
 
   const CN = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七'];
   const strokeLabel = sk => (CN[sk-1] || sk) + '画';
 
-  function renderPage(p){
-    radicalListEl.innerHTML = '';
-    strokesForPage(p).forEach(sk => {
-      const group = document.createElement('div');
-      group.className = 'stroke-group';
-      const label = document.createElement('div');
-      label.className = 'stroke-group-label';
-      label.textContent = strokeLabel(sk);
-      group.appendChild(label);
-      byStroke[sk].forEach(r => {
-        const row = document.createElement('div');
-        row.className = 'radical-row';
-        row.dataset.radical = r.no;
-        row.innerHTML = `
-          <span class="radical-no">${r.no}</span>
-          <span class="radical-glyph">${r.char}${r.variant ? `<span class="variant">${r.variant}</span>` : ''}</span>`;
-        row.addEventListener('click', () => selectRadical(r.no));
-        group.appendChild(row);
+  // How many entry rows (not counting stroke-count headers) fit across one
+  // whole two-page 检字表 spread before it continues onto another spread —
+  // same idea as a real dictionary running out of room on a populous
+  // radical like 木 or 言 and continuing the listing onto the next page.
+  const ENTRIES_PER_SPREAD = 34;
+
+  // ---------- building the book ----------
+
+  // A flat list of {type:'label', text} / {type:'radical', r} items for one
+  // 部首目录 stroke-count group, in the order they'd print.
+  function itemsForIndexGroup(g){
+    const items = [];
+    strokesForIndexGroup(g).forEach(sk => {
+      items.push({ type: 'label', cls: 'stroke-group-label', text: strokeLabel(sk) });
+      byStroke[sk].forEach(r => items.push({ type: 'radical', r }));
+    });
+    return items;
+  }
+
+  // A flat list of {type:'label'} / {type:'entry', e} items for one
+  // radical's characters, grouped by residual stroke count, chunked into
+  // spread-sized pages.
+  function chunkRadicalEntries(list){
+    const byRs = {};
+    list.forEach(e => (byRs[e.rs] = byRs[e.rs] || []).push(e));
+    const rsKeys = Object.keys(byRs).map(Number).sort((a,b)=>a-b);
+    const items = [];
+    rsKeys.forEach(rs => {
+      items.push({ type: 'label', cls: 'stroke-block-label', text: `+${rs} 画` });
+      byRs[rs].forEach(e => items.push({ type: 'entry', e }));
+    });
+    const chunks = [];
+    let cur = [], count = 0;
+    items.forEach(item => {
+      cur.push(item);
+      if (item.type === 'entry') count++;
+      if (count >= ENTRIES_PER_SPREAD){ chunks.push(cur); cur = []; count = 0; }
+    });
+    if (cur.length) chunks.push(cur);
+    return chunks.length ? chunks : [[]];
+  }
+
+  // Splits one spread's items array roughly in half between the left and
+  // right page, without ever stranding a header label alone at the bottom
+  // of the left page (a real book wouldn't print a heading with nothing
+  // under it either).
+  function splitItemsForSpread(items){
+    let mid = Math.ceil(items.length / 2);
+    while (mid > 0 && items[mid - 1] && items[mid - 1].type === 'label') mid--;
+    return [items.slice(0, mid), items.slice(mid)];
+  }
+
+  // The whole book, front to back: every 部首目录 spread first, then every
+  // 检字表 spread (radical by radical, in the standard 214-radical order).
+  // A radical with zero characters on file simply doesn't get a 检字表
+  // section — same as a real dictionary wouldn't print an empty entry.
+  function buildPages(){
+    const pages = [];
+    for (let g = 0; g < NUM_INDEX_PAGES; g++) pages.push({ type: 'index', groupIdx: g });
+
+    const byRadical = {};
+    ENTRIES.forEach(e => { (byRadical[e.r] = byRadical[e.r] || []).push(e); });
+
+    RADICALS.forEach(r => {
+      const list = byRadical[r.no];
+      if (!list || !list.length) return;
+      const chunks = chunkRadicalEntries(list);
+      chunks.forEach((items, ci) => {
+        pages.push({ type: 'entries', radicalNo: r.no, items, chunkIndex: ci, totalChunks: chunks.length });
       });
-      radicalListEl.appendChild(group);
     });
-    document.getElementById('pageNumLeft').textContent = (p * 2 + 1);
-    document.getElementById('pageNumRight').textContent = (p * 2 + 2);
+
+    PAGES = pages;
   }
 
-  function renderPageNav(){
-    document.getElementById('prevBtn').disabled = currentPage === 0;
-    document.getElementById('nextBtn').disabled = currentPage === NUM_PAGES - 1;
-    const sks = strokesForPage(currentPage);
-    const lo = sks[0], hi = sks[sks.length - 1];
-    document.getElementById('pageCounter').textContent =
-      lo === hi ? strokeLabel(lo) : strokeLabel(lo) + ' — ' + strokeLabel(hi);
+  function firstPageIndexForRadical(no){
+    return PAGES.findIndex(p => p.type === 'entries' && p.radicalNo === no);
+  }
+  function pageIndexForWord(word, radicalNo){
+    return PAGES.findIndex(p => p.type === 'entries' && p.radicalNo === radicalNo &&
+      p.items.some(it => it.type === 'entry' && it.e.w === word));
   }
 
-  function goToPage(p, { silent } = {}){
-    currentPage = p;
-    if (!silent){
-      spreadEl.classList.add('flipping');
-      setTimeout(() => spreadEl.classList.remove('flipping'), 340);
-    }
-    renderPage(p);
-    renderPageNav();
-    highlightActiveRadical();
-  }
+  // ---------- rendering ----------
 
-  function highlightActiveRadical(){
-    document.querySelectorAll('.radical-row').forEach(el => {
-      el.classList.toggle('active', Number(el.dataset.radical) === currentRadicalNo);
-    });
-  }
-
-  // Build the facing-page dictionary entries for one radical, in the
-  // running style of a real Xinhua Zidian body page: headword, pinyin,
-  // total-stroke count, then the gloss — grouped by residual strokes,
-  // same grouping the 检字表 index itself uses.
   function dictEntryHTML(e){
     const strokes = e.ts ? `<span class="head-strokes">共${e.ts}画</span>` : '';
     return `
@@ -413,54 +441,149 @@
       </div>`;
   }
 
-  function renderRadicalPage(no, { highlightWord } = {}){
-    const radical = RADICALS.find(r => r.no === no);
-    const entries = ENTRIES.filter(e => e.r === no).sort((a,b) => a.rs - b.rs);
-    const byRs = {};
-    entries.forEach(e => (byRs[e.rs] = byRs[e.rs] || []).push(e));
-    const rsKeys = Object.keys(byRs).map(Number).sort((a,b)=>a-b);
+  function radicalRowHTML(r){
+    const known = !ENTRIES.length || firstPageIndexForRadical(r.no) !== -1;
+    return `
+      <div class="radical-row${known ? '' : ' dim'}" data-radical="${r.no}">
+        <span class="radical-no">${r.no}</span>
+        <span class="radical-glyph">${r.char}${r.variant ? `<span class="variant">${r.variant}</span>` : ''}</span>
+      </div>`;
+  }
 
-    let html = `
-      <div class="entries-head">
-        <div class="big-glyph">${radical.char}${radical.variant ? `<span class="variant-big">${radical.variant}</span>` : ''}</div>
-        <div class="meta">部首 ${radical.no} · ${radical.strokes} 画 · ${radical.pinyin}<br>${radical.meaning}</div>
-      </div>
-      <div class="entries-body">`;
-    if (rsKeys.length === 0){
+  function renderIndexHalf(container, items, { first }){
+    let html = '';
+    if (first){
+      html += `
+        <div class="page-running-head">部首檢字表 · RADICAL INDEX</div>
+        <div class="page-title">部首目錄</div>
+        <div class="page-sub">(一) click a radical to open its 檢字表 page</div>`;
+    }
+    html += `<div class="radical-list">`;
+    items.forEach(item => {
+      html += item.type === 'label'
+        ? `<div class="${item.cls}">${item.text}</div>`
+        : radicalRowHTML(item.r);
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+    container.querySelectorAll('.radical-row:not(.dim)').forEach(row => {
+      row.addEventListener('click', () => jumpToRadical(Number(row.dataset.radical)));
+    });
+  }
+
+  function renderIndexSpread(groupIdx){
+    const items = itemsForIndexGroup(groupIdx);
+    const [left, right] = splitItemsForSpread(items);
+    renderIndexHalf(pageLeftContent, left, { first: true });
+    renderIndexHalf(pageRightContent, right, { first: false });
+  }
+
+  function renderEntriesHalf(container, items, { head } = {}){
+    let html = '';
+    if (head){
+      html += `
+        <div class="page-running-head">檢字表 · CHARACTER INDEX</div>
+        <div class="entries-head">
+          <div class="big-glyph">${head.radical.char}${head.radical.variant ? `<span class="variant-big">${head.radical.variant}</span>` : ''}</div>
+          <div class="meta">部首 ${head.radical.no} · ${head.radical.strokes} 画 · ${head.radical.pinyin}<br>${head.radical.meaning}${head.totalChunks > 1 ? `<br><span style="font-size:9px;opacity:.65;">第 ${head.chunkIndex + 1} / ${head.totalChunks} 页 · continued</span>` : ''}</div>
+        </div>`;
+    }
+    html += `<div class="entries-body">`;
+    if (!items.length){
       html += `<div class="entries-empty">（此部首暂无收字）</div>`;
     } else {
-      rsKeys.forEach(rs => {
-        html += `<div class="stroke-block"><div class="stroke-block-label">+${rs} 画</div><div class="dict-entries">`;
-        byRs[rs].forEach(e => { html += dictEntryHTML(e); });
-        html += `</div></div>`;
+      items.forEach(item => {
+        html += item.type === 'label'
+          ? `<div class="${item.cls}">${item.text}</div>`
+          : dictEntryHTML(item.e);
       });
     }
     html += `</div>`;
-    entriesPageEl.innerHTML = html;
+    container.innerHTML = html;
+  }
 
-    if (highlightWord){
-      const tile = entriesPageEl.querySelector(`.dict-entry[data-word="${highlightWord}"]`);
-      if (tile){
-        tile.classList.add('flash');
-        tile.scrollIntoView({ block: 'center' });
-        setTimeout(() => tile.classList.remove('flash'), 1400);
-      }
+  function renderEntriesSpread(page){
+    const radical = RADICALS.find(r => r.no === page.radicalNo);
+    const [left, right] = splitItemsForSpread(page.items);
+    renderEntriesHalf(pageLeftContent, left, {
+      head: { radical, totalChunks: page.totalChunks, chunkIndex: page.chunkIndex },
+    });
+    renderEntriesHalf(pageRightContent, right, {});
+  }
+
+  function applyPendingHighlight(){
+    if (!pendingHighlightWord) return;
+    const tile = document.querySelector(`.dict-entry[data-word="${pendingHighlightWord}"]`);
+    if (tile){
+      tile.classList.add('flash');
+      tile.scrollIntoView({ block: 'center' });
+      setTimeout(() => tile.classList.remove('flash'), 1400);
+    }
+    pendingHighlightWord = null;
+  }
+
+  function renderPageNav(){
+    prevBtn.disabled = currentPageIdx === 0;
+    nextBtn.disabled = currentPageIdx === PAGES.length - 1;
+    const page = PAGES[currentPageIdx];
+    if (!page) { pageCounterEl.textContent = ''; return; }
+    if (page.type === 'index'){
+      const sks = strokesForIndexGroup(page.groupIdx);
+      const lo = sks[0], hi = sks[sks.length - 1];
+      pageCounterEl.textContent = '部首目录 · ' + (lo === hi ? strokeLabel(lo) : strokeLabel(lo) + ' — ' + strokeLabel(hi));
+    } else {
+      const radical = RADICALS.find(r => r.no === page.radicalNo);
+      pageCounterEl.textContent = `檢字表 · 部首 ${radical.char} (${radical.no})`;
     }
   }
 
-  function selectRadical(no, opts){
-    currentRadicalNo = no;
-    highlightActiveRadical();
-    renderRadicalPage(no, opts);
+  function goToPage(i, { silent } = {}){
+    if (i < 0 || i >= PAGES.length) return;
+    currentPageIdx = i;
+    const page = PAGES[i];
+    if (!silent){
+      spreadEl.classList.add('flipping');
+      setTimeout(() => spreadEl.classList.remove('flipping'), 340);
+    }
+    if (page.type === 'index') renderIndexSpread(page.groupIdx);
+    else renderEntriesSpread(page);
+    pageNumLeftEl.textContent = i * 2 + 1;
+    pageNumRightEl.textContent = i * 2 + 2;
+    renderPageNav();
+    applyPendingHighlight();
   }
 
-  document.getElementById('prevBtn').addEventListener('click', () => { if (currentPage > 0) goToPage(currentPage - 1); });
-  document.getElementById('nextBtn').addEventListener('click', () => { if (currentPage < NUM_PAGES - 1) goToPage(currentPage + 1); });
+  function jumpToRadical(no){
+    const idx = firstPageIndexForRadical(no);
+    if (idx === -1){
+      searchHint.textContent = '(no characters filed under this radical yet)';
+      setTimeout(() => { if (!searchInput.value.trim()) searchHint.textContent = ''; }, 1800);
+      return;
+    }
+    goToPage(idx);
+  }
+
+  prevBtn.addEventListener('click', () => goToPage(currentPageIdx - 1));
+  nextBtn.addEventListener('click', () => goToPage(currentPageIdx + 1));
+
+  function onEntryClick(e){
+    const tile = e.target.closest('.dict-entry');
+    if (!tile) return;
+    const entry = ENTRIES.find(x => x.w === tile.dataset.word);
+    if (!entry) return;
+    const idx = pageIndexForWord(entry.w, entry.r);
+    if (idx === -1) return;
+    pendingHighlightWord = entry.w;
+    searchInput.value = '';
+    searchClear.classList.remove('show');
+    searchHint.textContent = '';
+    goToPage(idx);
+  }
+  pageLeftContent.addEventListener('click', onEntryClick);
+  pageRightContent.addEventListener('click', onEntryClick);
 
   // ---------------- search ----------------
-  function stripTones(s){
-    return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  }
+  function stripTones(s){ return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
   const isHanChar = ch => /[\u4e00-\u9fff]/.test(ch);
 
   function runSearch(qRaw){
@@ -468,32 +591,28 @@
     searchClear.classList.toggle('show', q.length > 0);
     if (!q){
       searchHint.textContent = '';
-      if (currentRadicalNo){
-        renderRadicalPage(currentRadicalNo);
-      } else {
-        entriesPageEl.innerHTML = '';
-      }
+      goToPage(currentPageIdx, { silent: true });
       return;
     }
 
     const qHan = [...q].filter(isHanChar);
     const qLatin = stripTones(q);
-
     let results;
     if (qHan.length){
       results = ENTRIES.filter(e => qHan.includes(e.w));
     } else {
       results = ENTRIES.filter(e =>
-        stripTones(e.py).includes(qLatin) ||
-        (e.def || '').toLowerCase().includes(qLatin)
-      ).slice(0, 200);
+        stripTones(e.py).includes(qLatin) || (e.def || '').toLowerCase().includes(qLatin)
+      ).slice(0, 300);
     }
 
     searchHint.textContent = results.length ? `${results.length} found` : 'no matches';
-    document.querySelectorAll('.radical-row').forEach(el => el.classList.remove('active'));
 
     if (!results.length){
-      entriesPageEl.innerHTML = `<div class="entries-empty">未找到「${q}」<br><span style="font-size:11px;">No matches for "${q}"</span></div>`;
+      pageLeftContent.innerHTML = `<div class="entries-empty">未找到「${q}」<br><span style="font-size:11px;">No matches for "${q}"</span></div>`;
+      pageRightContent.innerHTML = '';
+      pageNumLeftEl.textContent = '';
+      pageNumRightEl.textContent = '';
       return;
     }
 
@@ -501,31 +620,19 @@
     results.forEach(e => (byRadical[e.r] = byRadical[e.r] || []).push(e));
     const radicalKeys = Object.keys(byRadical).map(Number).sort((a,b)=>a-b);
 
-    let html = `<div class="search-meta">「${q}」 — ${results.length} result${results.length===1?'':'s'}</div><div class="entries-body">`;
+    const items = [{ type: 'label', cls: 'search-result-heading', text: `「${q}」 — ${results.length} result${results.length === 1 ? '' : 's'}` }];
     radicalKeys.forEach(rno => {
       const radical = RADICALS.find(r => r.no === rno);
-      html += `<div class="search-group-label">部首 ${radical.char} (${rno})</div><div class="dict-entries">`;
-      byRadical[rno].forEach(e => { html += dictEntryHTML(e); });
-      html += `</div>`;
+      items.push({ type: 'label', cls: 'search-group-label', text: `部首 ${radical.char} (${rno})` });
+      byRadical[rno].forEach(e => items.push({ type: 'entry', e }));
     });
-    html += `</div>`;
-    entriesPageEl.innerHTML = html;
-  }
 
-  entriesPageEl.addEventListener('click', (e) => {
-    const tile = e.target.closest('.dict-entry');
-    if (!tile) return;
-    const entry = ENTRIES.find(x => x.w === tile.dataset.word);
-    if (!entry) return;
-    // jump the left index to this character's radical page and open it
-    const sk = RADICALS.find(r => r.no === entry.r).strokes;
-    const targetPage = pageIdxForStroke(sk);
-    if (targetPage !== currentPage) goToPage(targetPage, { silent: true });
-    searchInput.value = '';
-    searchClear.classList.remove('show');
-    searchHint.textContent = '';
-    selectRadical(entry.r, { highlightWord: entry.w });
-  });
+    const [left, right] = splitItemsForSpread(items);
+    renderEntriesHalf(pageLeftContent, left, {});
+    renderEntriesHalf(pageRightContent, right, {});
+    pageNumLeftEl.textContent = '';
+    pageNumRightEl.textContent = '';
+  }
 
   let searchDebounce;
   searchInput.addEventListener('input', () => {
@@ -539,12 +646,14 @@
   });
 
   async function init(){
-    renderPage(currentPage);
-    renderPageNav();
+    buildPages();          // 部首目录 pages only, until entries load
+    goToPage(0, { silent: true });
     const { entries } = await loadJianziEntries();
     ENTRIES = entries;
-    // Open on a real page, like an actual book, instead of a blank spread.
-    selectRadical(RADICALS[0].no);
+    buildPages();           // now the 检字表 pages exist too, appended after
+    if (PAGES[currentPageIdx] && PAGES[currentPageIdx].type === 'index'){
+      renderIndexSpread(PAGES[currentPageIdx].groupIdx); // refresh the "dim" state on unfiled radicals
+    }
   }
   init();
 </script>
