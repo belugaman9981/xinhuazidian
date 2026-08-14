@@ -169,6 +169,14 @@
     display:flex; align-items:baseline; gap: 3px;
   }
   .radical-glyph .variant{ font-size: 12px; color: var(--gold); }
+  .radical-glyph .radical-pinyin{
+    font-family:"Noto Serif", serif;
+    font-size: 10px;
+    color: var(--seal-dark);
+    opacity: 0.78;
+    font-style: italic;
+    letter-spacing: 0.3px;
+  }
   .radical-no{ font-size: 10px; color: var(--ink-soft); flex: 0 0 22px; text-align: right; }
   .radical-row.dim{ opacity: 0.4; cursor: default; }
 
@@ -446,7 +454,7 @@
     return `
       <div class="radical-row${known ? '' : ' dim'}" data-radical="${r.no}">
         <span class="radical-no">${r.no}</span>
-        <span class="radical-glyph">${r.char}${r.variant ? `<span class="variant">${r.variant}</span>` : ''}</span>
+        <span class="radical-glyph">${r.char}${r.variant ? `<span class="variant">${r.variant}</span>` : ''}${r.pinyin ? `<span class="radical-pinyin">${r.pinyin}</span>` : ''}</span>
       </div>`;
   }
 
