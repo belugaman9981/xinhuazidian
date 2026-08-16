@@ -260,7 +260,8 @@
 
   .page-nav{
     display:flex; align-items:center; justify-content:center; gap: 22px;
-    padding: 10px 0 4px;
+    min-height: 38px;
+    padding: 6px 0 4px;
   }
   .nav-btn{
     background:none; border:none; color: rgba(239,228,204,0.7);
@@ -273,6 +274,10 @@
     font-size: 11px; color: rgba(239,228,204,0.55); letter-spacing: 1px;
     min-width: 130px; text-align:center;
     font-family:"Noto Serif SC", serif;
+  }
+
+  @media (max-height: 700px) and (min-width: 821px){
+    .stage{ align-items:flex-start; }
   }
 
   @media (max-width: 820px){
