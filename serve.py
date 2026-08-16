@@ -17,9 +17,20 @@ import webbrowser
 PORT = 8000
 
 
+class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+    """Same as the default handler, but tells the browser never to cache
+    anything — otherwise, after you regenerate index.html or the data
+    files, your browser can keep showing an old cached copy even though
+    the files on disk have changed."""
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
+
 def main():
-    handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", PORT), handler) as httpd:
+    with socketserver.TCPServer(("", PORT), NoCacheHandler) as httpd:
         url = f"http://localhost:{PORT}/index.html"
         print(f"Serving at {url}  (Ctrl+C to stop)")
         try:
