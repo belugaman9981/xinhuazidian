@@ -495,7 +495,14 @@
       const natural = container.scrollHeight;
       const rows = container.children;
       if (!rows.length || natural <= 0 || available <= natural) return;
-      const extra = Math.min(28, (available - natural) / rows.length);
+      // If this container uses CSS multi-column layout (e.g. the 3-column
+      // radical index), rows.length counts every item across ALL columns —
+      // but the leftover space only needs filling within ONE column's
+      // height, so divide by rows-per-column, not the total row count.
+      const colCountRaw = getComputedStyle(container).columnCount;
+      const numCols = (colCountRaw && colCountRaw !== 'auto') ? (parseInt(colCountRaw, 10) || 1) : 1;
+      const rowsPerCol = Math.max(1, Math.ceil(rows.length / numCols));
+      const extra = Math.min(28, (available - natural) / rowsPerCol);
       if (extra > 0.5){
         for (const row of rows) row.style.marginBottom = extra + 'px';
       }
