@@ -28,6 +28,7 @@ Unihan.zip release directly from unicode.org.
 
 import json
 import re
+from pathlib import Path
 from unihan_etl.core import Packager
 
 # Kangxi radical glyphs, indexed 1-214, for reference/display.
@@ -58,6 +59,21 @@ def parse_kRSUnicode(value):
     return int(match.group(1)), int(match.group(2))
 
 
+def load_legacy_definitions():
+    """Load the richer local definitions for characters missing Unihan text."""
+    path = Path(__file__).with_name("data") / "word.json"
+    if not path.exists():
+        return {}
+
+    with path.open(encoding="utf-8") as f:
+        records = json.load(f)
+    return {
+        record["word"]: record["explanation"]
+        for record in records
+        if record.get("word") and record.get("explanation")
+    }
+
+
 def main():
     # IMPORTANT: don't pass "fields" here. unihan-etl uses an internal,
     # hardcoded field->file lookup table to decide which of the 8 Unihan
@@ -85,6 +101,7 @@ def main():
             "download completed (see the cache dir printed above)."
         )
 
+    legacy_definitions = load_legacy_definitions()
     out = []
     for rec in records:
         char = rec.get("char")
@@ -128,6 +145,8 @@ def main():
         definition = rec.get("kDefinition")
         if isinstance(definition, list):
             definition = "; ".join(definition)
+        if not definition:
+            definition = legacy_definitions.get(char)
 
         out.append({
             "word": char,
@@ -136,6 +155,7 @@ def main():
             "total_strokes": total_strokes,
             "pinyin": pinyin,
             "definition": definition,
+            "chinese_definition": legacy_definitions.get(char),
         })
 
     out.sort(key=lambda e: (e["radical"], e["residual_strokes"] or 0))

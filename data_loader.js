@@ -18,6 +18,7 @@ async function loadJianziEntries() {
         ts: e.total_strokes,
         py: e.pinyin || "",
         def: e.definition || "(no definition on file)",
+        fullDef: e.chinese_definition || "",
       })),
       source: "full",
     };
@@ -33,6 +34,7 @@ async function loadJianziEntries() {
           ts: e.total_strokes,
           py: e.pinyin || "",
           def: e.definition || "(no definition on file)",
+          fullDef: e.chinese_definition || "",
         })),
         source: "full-inline",
       };
