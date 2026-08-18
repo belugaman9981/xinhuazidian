@@ -484,29 +484,31 @@
   // page rather than leaving a dangling gap, so measure how much room is
   // left over and spread it evenly as extra breathing room between rows.
   function fillRemainingSpace(container){
-    const raf = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 0);
-    raf(() => {
-      const pageContent = container.parentElement;
-      if (!pageContent) return;
-      let headerHeight = 0;
-      let sib = container.previousElementSibling;
-      while (sib){ headerHeight += sib.offsetHeight; sib = sib.previousElementSibling; }
-      const available = pageContent.clientHeight - headerHeight;
-      const natural = container.scrollHeight;
-      const rows = container.children;
-      if (!rows.length || natural <= 0 || available <= natural) return;
-      // If this container uses CSS multi-column layout (e.g. the 3-column
-      // radical index), rows.length counts every item across ALL columns —
-      // but the leftover space only needs filling within ONE column's
-      // height, so divide by rows-per-column, not the total row count.
-      const colCountRaw = getComputedStyle(container).columnCount;
-      const numCols = (colCountRaw && colCountRaw !== 'auto') ? (parseInt(colCountRaw, 10) || 1) : 1;
-      const rowsPerCol = Math.max(1, Math.ceil(rows.length / numCols));
-      const extra = Math.min(28, (available - natural) / rowsPerCol);
-      if (extra > 0.5){
-        for (const row of rows) row.style.marginBottom = extra + 'px';
-      }
-    });
+    if (!container) return;
+    const pageContent = container.parentElement;
+    if (!pageContent) return;
+    let headerHeight = 0;
+    let sib = container.previousElementSibling;
+    while (sib){ headerHeight += sib.offsetHeight; sib = sib.previousElementSibling; }
+    // Account for any top padding on the page box itself — alignPageStarts
+    // adds that to line up with the facing page's header, and it eats
+    // into the space actually available to this container's rows.
+    const ownPaddingTop = parseFloat(getComputedStyle(pageContent).paddingTop) || 0;
+    const available = pageContent.clientHeight - headerHeight - ownPaddingTop;
+    const natural = container.scrollHeight;
+    const rows = container.children;
+    if (!rows.length || natural <= 0 || available <= natural) return;
+    // If this container uses CSS multi-column layout (e.g. the 3-column
+    // radical index), rows.length counts every item across ALL columns —
+    // but the leftover space only needs filling within ONE column's
+    // height, so divide by rows-per-column, not the total row count.
+    const colCountRaw = getComputedStyle(container).columnCount;
+    const numCols = (colCountRaw && colCountRaw !== 'auto') ? (parseInt(colCountRaw, 10) || 1) : 1;
+    const rowsPerCol = Math.max(1, Math.ceil(rows.length / numCols));
+    const extra = Math.min(28, (available - natural) / rowsPerCol);
+    if (extra > 0.5){
+      for (const row of rows) row.style.marginBottom = extra + 'px';
+    }
   }
 
   function renderIndexHalf(container, items, { first }){
@@ -528,7 +530,6 @@
     container.querySelectorAll('.radical-row:not(.dim)').forEach(row => {
       row.addEventListener('click', () => jumpToRadical(Number(row.dataset.radical)));
     });
-    fillRemainingSpace(container.querySelector('.radical-list'));
   }
 
   function renderIndexSpread(groupIdx){
@@ -536,6 +537,9 @@
     const [left, right] = splitItemsForSpread(items);
     renderIndexHalf(pageLeftContent, left, { first: true });
     renderIndexHalf(pageRightContent, right, { first: false });
+    alignPageStarts();
+    fillRemainingSpace(pageLeftContent.querySelector('.radical-list'));
+    fillRemainingSpace(pageRightContent.querySelector('.radical-list'));
   }
 
   function renderEntriesHalf(container, items, { head } = {}){
@@ -560,7 +564,6 @@
     }
     html += `</div>`;
     container.innerHTML = html;
-    fillRemainingSpace(container.querySelector('.entries-body'));
   }
 
   function renderEntriesSpread(page){
@@ -570,6 +573,9 @@
       head: { radical, totalChunks: page.totalChunks, chunkIndex: page.chunkIndex },
     });
     renderEntriesHalf(pageRightContent, right, {});
+    alignPageStarts();
+    fillRemainingSpace(pageLeftContent.querySelector('.entries-body'));
+    fillRemainingSpace(pageRightContent.querySelector('.entries-body'));
   }
 
   function applyPendingHighlight(){
@@ -596,6 +602,20 @@
       const radical = RADICALS.find(r => r.no === page.radicalNo);
       pageCounterEl.textContent = `檢字表 · 部首 ${radical.char} (${radical.no})`;
     }
+  }
+
+  // If the left page has a header block (title, or a radical's big glyph
+  // header) above its rows, the right page — which never repeats that
+  // header — would otherwise start its own first row higher up than the
+  // left page's first row. Real facing pages line up at the same
+  // baseline, so pad the right page down to match.
+  function alignPageStarts(){
+    let headerHeight = 0;
+    for (const child of pageLeftContent.children){
+      if (child.classList.contains('radical-list') || child.classList.contains('entries-body')) break;
+      headerHeight += child.offsetHeight;
+    }
+    pageRightContent.style.paddingTop = headerHeight ? headerHeight + 'px' : '';
   }
 
   function goToPage(i, { silent } = {}){
@@ -672,6 +692,7 @@
     if (!results.length){
       pageLeftContent.innerHTML = `<div class="entries-empty">未找到「${q}」<br><span style="font-size:11px;">No matches for "${q}"</span></div>`;
       pageRightContent.innerHTML = '';
+      pageRightContent.style.paddingTop = '';
       pageNumLeftEl.textContent = '';
       pageNumRightEl.textContent = '';
       return;
@@ -691,6 +712,9 @@
     const [left, right] = splitItemsForSpread(items);
     renderEntriesHalf(pageLeftContent, left, {});
     renderEntriesHalf(pageRightContent, right, {});
+    alignPageStarts();
+    fillRemainingSpace(pageLeftContent.querySelector('.entries-body'));
+    fillRemainingSpace(pageRightContent.querySelector('.entries-body'));
     pageNumLeftEl.textContent = '';
     pageNumRightEl.textContent = '';
   }
