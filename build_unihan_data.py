@@ -26,10 +26,43 @@ This will take a minute or two the first time — it downloads the
 Unihan.zip release directly from unicode.org.
 """
 
+import gzip
 import json
 import re
+import time
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from unihan_etl.core import Packager
+
+CEDICT_URL = "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz"
+CEDICT_CACHE = Path(__file__).with_name("data") / "cedict_cache.txt.gz"
+
+
+def load_cedict_definitions():
+    """Download CC-CEDICT once and return a single-character -> English definition map."""
+    if not CEDICT_CACHE.exists():
+        print("Downloading CC-CEDICT…")
+        urllib.request.urlretrieve(CEDICT_URL, CEDICT_CACHE)
+        print("Done.")
+
+    defs = {}
+    entry_re = re.compile(r"^(\S+)\s+(\S+)\s+\[([^\]]+)\]\s+/(.+)/$")
+    with gzip.open(CEDICT_CACHE, "rt", encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            m = entry_re.match(line.rstrip())
+            if not m:
+                continue
+            trad, simp, _pinyin, raw_defs = m.groups()
+            # Only single-character entries; store by both forms
+            if len(trad) == 1:
+                definition = raw_defs.replace("/", "; ")
+                defs.setdefault(trad, definition)
+            if len(simp) == 1:
+                defs.setdefault(simp, raw_defs.replace("/", "; "))
+    return defs
 
 # Kangxi radical glyphs, indexed 1-214, for reference/display.
 # (Not required for the data build itself — just handy if you want
@@ -59,6 +92,40 @@ def parse_kRSUnicode(value):
     return int(match.group(1)), int(match.group(2))
 
 
+WIKTIONARY_CACHE = Path(__file__).with_name("data") / "wiktionary_cache.json"
+
+
+def fetch_wiktionary_definitions(chars):
+    """Fetch Wiktionary summaries for chars not yet covered, with local cache."""
+    cache = {}
+    if WIKTIONARY_CACHE.exists():
+        with WIKTIONARY_CACHE.open(encoding="utf-8") as f:
+            cache = json.load(f)
+
+    to_fetch = [ch for ch in chars if ch not in cache]
+    if to_fetch:
+        print(f"Fetching {len(to_fetch)} definitions from Wiktionary (cached: {len(cache)})…")
+        for i, ch in enumerate(to_fetch, 1):
+            url = "https://en.wiktionary.org/api/rest_v1/page/summary/" + urllib.parse.quote(ch, safe="")
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "xinhuazidian-builder/1.0"})
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    extract = data.get("extract", "").strip()
+                    cache[ch] = extract if len(extract) > 10 else None
+            except Exception:
+                cache[ch] = None
+            if i % 200 == 0:
+                print(f"  {i}/{len(to_fetch)}…")
+            time.sleep(0.15)
+
+        with WIKTIONARY_CACHE.open("w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False)
+        print(f"Done ({len(to_fetch)} fetched).")
+
+    return {k: v for k, v in cache.items() if v}
+
+
 def load_legacy_definitions():
     """Load the richer local definitions for characters missing Unihan text."""
     path = Path(__file__).with_name("data") / "word.json"
@@ -77,8 +144,9 @@ def load_legacy_definitions():
 
 
 def main():
-    # IMPORTANT: don't pass "fields" here. unihan-etl uses an internal,
-    # hardcoded field->file lookup table to decide which of the 8 Unihan
+    legacy_definitions = load_legacy_definitions()
+    cedict_definitions = load_cedict_definitions()
+    # hardcoded field->file lookup table (see long comment below) to decide which of the 8 Unihan
     # data files to load when you restrict "fields" — and that table is
     # stale: it still thinks kRSUnicode lives in Unihan_RadicalStrokeCounts.txt,
     # but Unicode moved it (along with kTotalStrokes) into Unihan_IRGSources.txt
@@ -103,7 +171,6 @@ def main():
             "download completed (see the cache dir printed above)."
         )
 
-    legacy_definitions = load_legacy_definitions()
     out = []
     for rec in records:
         char = rec.get("char")
@@ -148,7 +215,7 @@ def main():
         if isinstance(definition, list):
             definition = "; ".join(definition)
         if not definition:
-            definition = legacy_definitions.get(char)
+            definition = legacy_definitions.get(char) or cedict_definitions.get(char)
 
         out.append({
             "word": char,
@@ -159,6 +226,19 @@ def main():
             "definition": definition,
             "chinese_definition": legacy_definitions.get(char),
         })
+
+    # Wiktionary pass for characters still without any definition
+    # Skip CJK Ext-B/C/D/E/F/G (U+20000+) — these won't have Wiktionary pages
+    still_missing = sorted(
+        e["word"] for e in out
+        if not (e.get("chinese_definition") or e.get("definition"))
+        and ord(e["word"]) < 0x20000
+    )
+    if still_missing:
+        wiki_defs = fetch_wiktionary_definitions(still_missing)
+        for e in out:
+            if not (e.get("chinese_definition") or e.get("definition")):
+                e["definition"] = wiki_defs.get(e["word"])
 
     out.sort(key=lambda e: (
         e["radical"],

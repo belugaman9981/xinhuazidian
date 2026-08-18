@@ -3,6 +3,14 @@
 // present yet, or if the page was opened directly via file:// (browsers
 // block fetch() of local files that way — see README for how to serve
 // the page properly with serve.py).
+function briefDef(e) {
+  const full = e.chinese_definition || e.definition || "";
+  if (!full) return "(no definition on file)";
+  // show up to the first newline or sentence-end, max 60 chars
+  const cut = full.split(/\n|[。！？；;!?]/)[0].trim();
+  return cut.length > 60 ? cut.slice(0, 60) + "…" : cut || "(no definition on file)";
+}
+
 async function loadJianziEntries() {
   try {
     const res = await fetch("jianzi_data.json", { cache: "no-store" });
@@ -17,7 +25,7 @@ async function loadJianziEntries() {
         rs: e.residual_strokes,
         ts: e.total_strokes,
         py: e.pinyin || "",
-        def: e.chinese_definition || e.definition || "(no definition on file)",
+        def: briefDef(e),
         fullDef: e.chinese_definition || "",
       })),
       source: "full",
@@ -33,7 +41,7 @@ async function loadJianziEntries() {
           rs: e.residual_strokes,
           ts: e.total_strokes,
           py: e.pinyin || "",
-          def: e.chinese_definition || e.definition || "(no definition on file)",
+          def: briefDef(e),
           fullDef: e.chinese_definition || "",
         })),
         source: "full-inline",
