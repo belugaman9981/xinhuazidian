@@ -67,11 +67,13 @@ def load_legacy_definitions():
 
     with path.open(encoding="utf-8") as f:
         records = json.load(f)
-    return {
+    definitions = {
         record["word"]: record["explanation"]
         for record in records
         if record.get("word") and record.get("explanation")
     }
+    definitions["並"] = definitions.get("并", "")
+    return definitions
 
 
 def main():
@@ -158,7 +160,11 @@ def main():
             "chinese_definition": legacy_definitions.get(char),
         })
 
-    out.sort(key=lambda e: (e["radical"], e["residual_strokes"] or 0))
+    out.sort(key=lambda e: (
+        e["radical"],
+        e["residual_strokes"] if e["residual_strokes"] is not None else 0,
+        e["word"],
+    ))
 
     with open("jianzi_data.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
