@@ -27,16 +27,13 @@
     overflow-x:hidden;
   }
   .stage{
-    min-height:100dvh;
-    height:100dvh;
+    min-height:100vh;
     display:flex; align-items:center; justify-content:center;
-    padding: 10px 16px;
-    box-sizing:border-box;
+    padding: 20px 16px;
   }
   .book{
     position:relative;
     width:min(1180px, 97vw);
-    max-height:100%;
     background: linear-gradient(180deg, var(--cover) 0%, var(--cover-dark) 100%);
     border-radius: 6px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.04) inset;
@@ -86,9 +83,9 @@
     display:flex;
     background: var(--page);
     border-radius: 2px;
-    height: clamp(360px, calc(100dvh - 142px), 820px);
+    height: calc(100vh - 148px);
     max-height: 820px;
-    min-height: 0;
+    min-height: 460px;
     box-shadow: inset 0 0 40px rgba(0,0,0,0.12);
     overflow: hidden;
   }
@@ -217,7 +214,6 @@
     font-size: 11px; color: var(--ink-soft); margin-bottom: 6px;
   }
   .dict-entry{
-    position:relative;
     break-inside: avoid;
     padding: 2px 4px 3px 0;
     cursor: pointer;
@@ -225,16 +221,6 @@
     line-height: 1.38;
   }
   .dict-entry:hover{ background: rgba(165,49,42,0.06); }
-  .info-btn{
-    position:absolute; top:2px; right:2px;
-    width:18px; height:18px; padding:0;
-    border:1px solid rgba(165,49,42,0.42); border-radius:50%;
-    background:var(--page); color:var(--seal-dark);
-    font:700 12px/16px "Noto Serif", serif;
-    cursor:pointer; opacity:0; transition:opacity .15s ease, background .15s ease;
-  }
-  .dict-entry:hover .info-btn, .info-btn:focus-visible{ opacity:1; }
-  .info-btn:hover{ background:#fff8e8; }
   .dict-entry.flash{ background: rgba(165,49,42,0.22); }
   .dict-entry .headword{
     font-family:"Noto Serif SC", serif; font-weight: 700;
@@ -249,33 +235,6 @@
   .dict-entry .head-def{
     display:block; font-size: 11px; color: var(--ink-soft); margin-top: 1px;
   }
-
-  .definition-dialog{
-    position:fixed; inset:0; z-index:10;
-    display:flex; align-items:center; justify-content:center;
-    padding:20px; background:transparent;
-    pointer-events:none;
-  }
-  .definition-dialog[hidden]{ display:none; }
-  .definition-panel{
-    position:relative; width:min(620px, 94vw); max-height:min(680px, 86vh);
-    overflow:auto; padding:28px 30px 30px;
-    background:var(--page); color:var(--ink);
-    border:1px solid var(--page-shadow); border-radius:2px;
-    box-shadow:0 12px 30px rgba(36,31,24,0.3), inset 0 0 28px rgba(0,0,0,0.06);
-    pointer-events:auto;
-  }
-  .definition-close{
-    position:absolute; top:8px; right:10px;
-    border:0; background:transparent; color:var(--ink-soft);
-    font-size:22px; line-height:1; cursor:pointer;
-  }
-  .definition-title{
-    margin:0 30px 2px 0; font:700 27px "Noto Serif SC", serif; color:var(--seal-dark);
-  }
-  .definition-meta{ color:var(--seal-dark); font-size:12px; font-style:italic; margin-bottom:18px; }
-  .definition-text{ white-space:pre-wrap; font-size:13px; line-height:1.75; }
-  .definition-empty{ color:var(--ink-soft); font-style:italic; }
 
   /* page number, bottom corner of every page — like a real printed book */
   .page-number{
@@ -317,7 +276,7 @@
   }
 
   @media (max-width: 820px){
-    .spread{ flex-direction: column; height: auto; min-height: 0; overflow: visible; }
+    .spread{ flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
     .page{ width: 100%; height: auto; }
     .page-left{ padding-right: 26px; border-bottom: 8px solid rgba(0,0,0,0.06); }
     .radical-list{ columns: 2; flex: none; overflow: visible; }
@@ -359,15 +318,6 @@
   </div>
 </div>
 
-<div class="definition-dialog" id="definitionDialog" hidden>
-  <div class="definition-panel" role="dialog" aria-modal="true" aria-labelledby="definitionTitle">
-    <button class="definition-close" id="definitionClose" type="button" aria-label="Close definition">&times;</button>
-    <h2 class="definition-title" id="definitionTitle"></h2>
-    <div class="definition-meta" id="definitionMeta"></div>
-    <div class="definition-text" id="definitionText"></div>
-  </div>
-</div>
-
 <script src="radicals_full.js"></script>
 <script src="sample_data.js"></script>
 <script src="jianzi_data.js"></script>
@@ -384,11 +334,6 @@
   const pageCounterEl    = document.getElementById('pageCounter');
   const prevBtn          = document.getElementById('prevBtn');
   const nextBtn          = document.getElementById('nextBtn');
-  const definitionDialog = document.getElementById('definitionDialog');
-  const definitionClose  = document.getElementById('definitionClose');
-  const definitionTitle  = document.getElementById('definitionTitle');
-  const definitionMeta   = document.getElementById('definitionMeta');
-  const definitionText   = document.getElementById('definitionText');
 
   const RADICALS = KANGXI_RADICALS_FULL;
   let ENTRIES = [];
@@ -398,7 +343,6 @@
 
   const byStroke = {};
   RADICALS.forEach(r => { (byStroke[r.strokes] = byStroke[r.strokes] || []).push(r); });
-  Object.values(byStroke).forEach(group => group.sort((a, b) => a.no - b.no));
   const strokeKeys = Object.keys(byStroke).map(Number).sort((a,b)=>a-b);
 
   // 部首目录 pages: instead of fixed stroke-count breakpoints (which produce
@@ -436,11 +380,6 @@
   // same idea as a real dictionary running out of room on a populous
   // radical like 木 or 言 and continuing the listing onto the next page.
   const ENTRIES_PER_SPREAD = 34;
-  const characterCollator = new Intl.Collator('zh-u-co-stroke', { usage: 'sort' });
-  const compareCharacters = (a, b) => {
-    const byStrokes = characterCollator.compare(a.w, b.w);
-    return byStrokes || a.w.codePointAt(0) - b.w.codePointAt(0);
-  };
 
   // ---------- building the book ----------
 
@@ -465,7 +404,7 @@
     const items = [];
     rsKeys.forEach(rs => {
       items.push({ type: 'label', cls: 'stroke-block-label', text: `+${rs} 画` });
-      byRs[rs].sort(compareCharacters).forEach(e => items.push({ type: 'entry', e }));
+      byRs[rs].forEach(e => items.push({ type: 'entry', e }));
     });
     const chunks = [];
     let cur = [], count = 0;
@@ -525,7 +464,6 @@
     const strokes = e.ts ? `<span class="head-strokes">共${e.ts}画</span>` : '';
     return `
       <div class="dict-entry" data-word="${e.w}">
-        <button class="info-btn" type="button" aria-label="查看${e.w}的新华字典释义" title="查看完整释义">i</button>
         <span class="headword">${e.w}</span><span class="head-pinyin">${e.py}</span>${strokes}
         <span class="head-def">${e.def}</span>
       </div>`;
@@ -709,37 +647,11 @@
   prevBtn.addEventListener('click', () => goToPage(currentPageIdx - 1));
   nextBtn.addEventListener('click', () => goToPage(currentPageIdx + 1));
 
-  function closeDefinition(){
-    definitionDialog.hidden = true;
-  }
-
-  function openDefinition(entry){
-    definitionTitle.textContent = entry.w;
-    definitionMeta.textContent = entry.py || '新华字典';
-    definitionText.textContent = entry.fullDef || '这个字在当前的新华字典数据中没有完整释义。';
-    definitionText.classList.toggle('definition-empty', !entry.fullDef);
-    definitionDialog.hidden = false;
-    definitionClose.focus();
-  }
-
-  definitionClose.addEventListener('click', closeDefinition);
-  definitionDialog.addEventListener('click', e => {
-    if (e.target === definitionDialog) closeDefinition();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !definitionDialog.hidden) closeDefinition();
-  });
-
   function onEntryClick(e){
     const tile = e.target.closest('.dict-entry');
     if (!tile) return;
     const entry = ENTRIES.find(x => x.w === tile.dataset.word);
     if (!entry) return;
-    if (e.target.closest('.info-btn')){
-      e.stopPropagation();
-      openDefinition(entry);
-      return;
-    }
     const idx = pageIndexForWord(entry.w, entry.r);
     if (idx === -1) return;
     pendingHighlightWord = entry.w;
