@@ -17,7 +17,7 @@ async function loadJianziEntries() {
         rs: e.residual_strokes,
         ts: e.total_strokes,
         py: e.pinyin || "",
-        def: e.definition || "(no definition on file)",
+        def: typeof e.definition === "string" ? e.definition.trim() : "",
       })),
       source: "full",
     };
@@ -32,7 +32,7 @@ async function loadJianziEntries() {
           rs: e.residual_strokes,
           ts: e.total_strokes,
           py: e.pinyin || "",
-          def: e.definition || "(no definition on file)",
+          def: typeof e.definition === "string" ? e.definition.trim() : "",
         })),
         source: "full-inline",
       };
