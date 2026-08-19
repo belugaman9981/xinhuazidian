@@ -29,7 +29,7 @@ Unihan.zip release directly from unicode.org.
 import gzip
 import json
 import re
-import time 
+import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
