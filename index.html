@@ -465,10 +465,10 @@
 
   function dictEntryHTML(e){
     const strokes = e.ts ? `<span class="head-strokes">共${e.ts}画</span>` : '';
+    const def = e.def ? `<span class="head-def">${e.def}</span>` : '';
     return `
       <div class="dict-entry" data-word="${e.w}">
-        <span class="headword">${e.w}</span><span class="head-pinyin">${e.py}</span>${strokes}
-        <span class="head-def">${e.def}</span>
+        <span class="headword">${e.w}</span><span class="head-pinyin">${e.py}</span>${strokes}${def}
       </div>`;
   }
 
