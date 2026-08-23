@@ -70,7 +70,7 @@ KANGXI_RADICALS = [
     # ... (truncated for brevity — full table of 214 is easy to find and paste in
     # if you want radical glyphs rather than just numbers; the numbers alone
     # are enough to group and sort characters correctly.)
-]
+] 
 
 
 def parse_kRSUnicode(value):
