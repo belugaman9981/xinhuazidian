@@ -375,6 +375,14 @@
   const CN = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七'];
   const strokeLabel = sk => (CN[sk-1] || sk) + '画';
 
+  function compareEntriesAlphabetically(a, b){
+    const aPinyin = stripTones(a.py || '');
+    const bPinyin = stripTones(b.py || '');
+    if (!aPinyin && bPinyin) return 1;
+    if (aPinyin && !bPinyin) return -1;
+    return aPinyin.localeCompare(bPinyin) || a.w.localeCompare(b.w);
+  }
+
   // How many entry rows (not counting stroke-count headers) fit across one
   // whole two-page 检字表 spread before it continues onto another spread —
   // same idea as a real dictionary running out of room on a populous
@@ -397,18 +405,13 @@
     return items;
   }
 
-  // A flat list of {type:'label'} / {type:'entry', e} items for one
-  // radical's characters, grouped by residual stroke count, chunked into
-  // spread-sized pages.
+  // A flat list of {type:'entry', e} items for one radical's characters,
+  // sorted alphabetically by pinyin and chunked into spread-sized pages.
   function chunkRadicalEntries(list){
-    const byRs = {};
-    list.forEach(e => (byRs[e.rs] = byRs[e.rs] || []).push(e));
-    const rsKeys = Object.keys(byRs).map(Number).sort((a,b)=>a-b);
-    const items = [];
-    rsKeys.forEach(rs => {
-      items.push({ type: 'label', cls: 'stroke-block-label', text: `+${rs} 画` });
-      byRs[rs].forEach(e => items.push({ type: 'entry', e }));
-    });
+    const items = list
+      .slice()
+      .sort(compareEntriesAlphabetically)
+      .map(e => ({ type: 'entry', e }));
     const chunks = [];
     let cur = [], count = 0;
     items.forEach(item => {
@@ -689,11 +692,11 @@
     const qLatin = stripTones(q);
     let results;
     if (qHan.length){
-      results = ENTRIES.filter(e => qHan.includes(e.w));
+      results = ENTRIES.filter(e => qHan.includes(e.w)).sort(compareEntriesAlphabetically);
     } else {
       results = ENTRIES.filter(e =>
         stripTones(e.py).includes(qLatin) || (e.def || '').toLowerCase().includes(qLatin)
-      ).slice(0, 300);
+      ).sort(compareEntriesAlphabetically).slice(0, 300);
     }
 
     searchHint.textContent = results.length ? `${results.length} found` : 'no matches';
