@@ -53,7 +53,7 @@ WORD_JSON_PATH = "data/word.json"
 # second fallback for characters that neither Unihan nor word.json gloss.
 # Same format as the official CC-CEDICT release.
 CEDICT_PATH = "data/cedict_cache.txt.gz"
- 
+
 # Characters whose only "definition" is a bare pinyin or a self-referential
 # pointer (e.g. "亐yú1.古同\"于\"。") are still real dictionary entries, so we
 # keep them — but we strip the leading headword+pinyin noise so the gloss
