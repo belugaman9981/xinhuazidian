@@ -215,10 +215,10 @@
   }
   .dict-entry{
     break-inside: avoid;
-    padding: 2px 4px 3px 0;
+    padding: 1px 4px 1px 0;
     cursor: pointer;
     border-radius: 2px;
-    line-height: 1.38;
+    line-height: 1.3;
   }
   .dict-entry:hover{ background: rgba(165,49,42,0.06); }
   .dict-entry.flash{ background: rgba(165,49,42,0.22); }
@@ -491,6 +491,7 @@
   // left over and spread it evenly as extra breathing room between rows.
   function fillRemainingSpace(container){
     if (!container) return;
+    if (!container.classList.contains('radical-list')) return;
     const pageContent = container.parentElement;
     if (!pageContent) return;
     let headerHeight = 0;
