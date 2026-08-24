@@ -491,7 +491,6 @@
   // left over and spread it evenly as extra breathing room between rows.
   function fillRemainingSpace(container){
     if (!container) return;
-    if (!container.classList.contains('radical-list')) return;
     const pageContent = container.parentElement;
     if (!pageContent) return;
     let headerHeight = 0;
@@ -518,7 +517,8 @@
     const colCountRaw = getComputedStyle(container).columnCount;
     const numCols = (colCountRaw && colCountRaw !== 'auto') ? (parseInt(colCountRaw, 10) || 1) : 1;
     const rowsPerCol = Math.max(1, Math.ceil(rows.length / numCols));
-    const extra = Math.min(22, (available - natural) / rowsPerCol);
+    const maxExtra = container.classList.contains('entries-body') ? 4 : 22;
+    const extra = Math.min(maxExtra, (available - natural) / rowsPerCol);
     if (extra > 0.5){
       for (const row of rows) row.style.marginBottom = extra + 'px';
     }
