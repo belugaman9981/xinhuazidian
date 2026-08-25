@@ -387,10 +387,26 @@
   // whole two-page 检字表 spread before it continues onto another spread —
   // same idea as a real dictionary running out of room on a populous
   // radical like 木 or 言 and continuing the listing onto the next page.
-  // Kept deliberately conservative: many definitions run long enough to
-  // wrap across two lines, so a higher count here risks the last row or
-  // two overflowing past the bottom of the page.
-  const ENTRIES_PER_SPREAD = 20;
+  //
+  // Instead of a fixed number, this is computed from the actual page height
+  // so every page is filled to the bottom with entries (pulled from the
+  // next page when needed) rather than leaving a dangling empty gap. The
+  // per-entry budget is deliberately a little generous — definitions often
+  // wrap to a second line — and fillRemainingSpace() then spreads the small
+  // leftover evenly as modest gaps.
+  let ENTRIES_PER_SPREAD = 20;
+  function computeEntriesPerSpread(){
+    const spread = document.querySelector('.spread');
+    if (!spread) return 20;
+    const pageH = spread.clientHeight;
+    // Rough per-entry height: headword line + optional wrapped definition.
+    const ENTRY_HEIGHT = 44;
+    // Space taken by the running head + radical header + page padding.
+    const HEADER_OVERHEAD = 110;
+    const availablePerPage = Math.max(120, pageH - HEADER_OVERHEAD);
+    const perPage = Math.max(1, Math.floor(availablePerPage / ENTRY_HEIGHT));
+    return perPage * 2;
+  }
 
   // ---------- building the book ----------
 
@@ -491,7 +507,6 @@
   // left over and spread it evenly as extra breathing room between rows.
   function fillRemainingSpace(container){
     if (!container) return;
-    if (container.classList.contains('entries-body')) return;
     const pageContent = container.parentElement;
     if (!pageContent) return;
     let headerHeight = 0;
@@ -506,7 +521,15 @@
     // final height isn't perfectly predictable from this one measurement.
     // Without headroom, that occasionally pushes the last row's text just
     // past the visible edge, where overflow:hidden silently clips it.
-    const SAFETY_MARGIN = 24;
+    //
+    // Entries (检字表) have variable heights — definitions wrap to a second
+    // line — so give them a touch more headroom than the fixed-height index
+    // rows, otherwise the last entry can get clipped. The per-row spread is
+    // kept modest so gaps between entries stay small while still pushing the
+    // last entry down to fill the bottom of the page.
+    const isEntries = container.classList.contains('entries-body');
+    const SAFETY_MARGIN = isEntries ? 24 : 24;
+    const MAX_EXTRA = isEntries ? 30 : 22;
     const available = pageContent.clientHeight - headerHeight - ownPaddingTop - SAFETY_MARGIN;
     const natural = container.scrollHeight;
     const rows = container.children;
@@ -518,7 +541,7 @@
     const colCountRaw = getComputedStyle(container).columnCount;
     const numCols = (colCountRaw && colCountRaw !== 'auto') ? (parseInt(colCountRaw, 10) || 1) : 1;
     const rowsPerCol = Math.max(1, Math.ceil(rows.length / numCols));
-    const extra = Math.min(22, (available - natural) / rowsPerCol);
+    const extra = Math.min(MAX_EXTRA, (available - natural) / rowsPerCol);
     if (extra > 0.5){
       for (const row of rows) row.style.marginBottom = extra + 'px';
     }
@@ -748,6 +771,10 @@
     goToPage(0, { silent: true });
     const { entries } = await loadJianziEntries();
     ENTRIES = entries;
+    // Size the 检字表 pages to the actual page height so each page is filled
+    // to the bottom with entries (pulling from the next page when needed)
+    // instead of leaving an empty gap.
+    ENTRIES_PER_SPREAD = computeEntriesPerSpread();
     buildPages();           // now the 检字表 pages exist too, appended after
     if (PAGES[currentPageIdx] && PAGES[currentPageIdx].type === 'index'){
       renderIndexSpread(PAGES[currentPageIdx].groupIdx); // refresh the "dim" state on unfiled radicals
